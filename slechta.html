@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="cs">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Baroko – Život šlechty</title>
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+    }
+
+    body {
+      overflow: hidden;
+      background: #120b07;
+      font-family: Georgia, "Times New Roman", serif;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    /* ==================================================
+       HLAVNÍ SCÉNA
+       ================================================== */
+
+    .game {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: #21140c;
+    }
+
+    .room-background {
+      position: absolute;
+      inset: 0;
+
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+
+      transition:
+        opacity 0.5s ease,
+        filter 0.5s ease;
+    }
+
+    .room-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+
+      pointer-events: none;
+
+      background:
+        linear-gradient(
+          180deg,
+          rgba(22, 11, 5, 0.22),
+          transparent 35%,
+          transparent 70%,
+          rgba(18, 8, 3, 0.30)
+        );
+    }
+
+    /* ==================================================
+       HORNÍ LIŠTA
+       ================================================== */
+
+    .top-bar {
+      position: absolute;
+      top: 17px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 50;
+
+      min-width: 420px;
+      padding: 10px 24px;
+
+      border: 2px solid #c79443;
+      border-radius: 15px;
+
+      background:
+        rgba(57, 31, 15, 0.88);
+
+      color: #f7dfa5;
+
+      text-align: center;
+
+      box-shadow:
+        0 8px 20px
+        rgba(0,0,0,0.35);
+    }
+
+    .room-counter {
+      margin-bottom: 2px;
+      color: #d6b478;
+      font-size: 12px;
+      letter-spacing: 3px;
+    }
+
+    .room-title {
+      font-size: 24px;
+      letter-spacing: 2px;
+    }
+
+    /* ==================================================
+       HRÁČOVA POSTAVA
+       ================================================== */
+
+    .player-character {
+      position: absolute;
+      left: 2%;
+      bottom: 0;
+
+      z-index: 18;
+
+      height: 42vh;
+      max-height: 440px;
+
+      filter:
+        drop-shadow(
+          0 10px 15px
+          rgba(0,0,0,0.45)
+        );
+
+      pointer-events: none;
+    }
+
+    /* ==================================================
+       ÚVODNÍ BUBLINA
+       ================================================== */
+
+    .guide-message {
+      position: absolute;
+
+      left: 13%;
+      bottom: 33%;
+
+      z-index: 40;
+
+      max-width: 200px;
+
+      padding: 15px 19px;
+
+      border: 2px solid #d0aa72;
+      border-radius: 19px;
+
+      background: #fffdf8;
+
+      color: #402719;
+
+      font-size: 16px;
+      line-height: 1.45;
+
+      box-shadow:
+        0 10px 24px
+        rgba(0,0,0,0.3);
+    }
+
+    .guide-message::after {
+      content: "";
+
+      position: absolute;
+
+      left: -19px;
+      bottom: 27px;
+
+      border-top: 12px solid transparent;
+      border-bottom: 12px solid transparent;
+      border-right: 20px solid #fffdf8;
+    }
+
+    /* ==================================================
+       HOTSPOTY
+       ================================================== */
+
+    .hotspots {
+      position: absolute;
+      inset: 0;
+      z-index: 20;
+    }
+
+    .hotspot {
+      position: absolute;
+
+      width: 52px;
+      height: 52px;
+
+      border: 3px solid #ffe3a1;
+      border-radius: 50%;
+
+      background:
+        rgba(208, 153, 58, 0.62);
+
+      color: #fff4ce;
+
+      font-size: 24px;
+
+      cursor: pointer;
+
+      box-shadow:
+        0 0 10px
+        rgba(255, 207, 102, 0.8),
+
+        0 0 24px
+        rgba(255, 190, 61, 0.55);
+
+      animation:
+        hotspotGlow
+        1.3s ease-in-out
+        infinite alternate;
+
+      transition:
+        transform 0.2s ease,
+        opacity 0.3s ease;
+    }
+
+    @keyframes hotspotGlow {
+
+      from {
+        box-shadow:
+          0 0 8px rgba(255, 207, 102, 0.65),
+          0 0 16px rgba(255, 190, 61, 0.40);
+      }
+
+      to {
+        box-shadow:
+          0 0 18px rgba(255, 224, 139, 1),
+          0 0 35px rgba(255, 190, 61, 0.85);
+      }
+
+    }
+
+    .hotspot:hover {
+      transform: scale(1.15);
+    }
+
+    .hotspot.visited {
+      opacity: 0.38;
+      animation: none;
+      box-shadow: none;
+    }
+
+    /* ==================================================
+       INFORMAČNÍ BUBLINA
+       ================================================== */
+
+    .info-bubble {
+      position: absolute;
+
+      z-index: 45;
+
+      width: min(370px, 35vw);
+
+      padding: 15px 18px;
+
+      border: 2px solid #d3ab71;
+      border-radius: 18px;
+
+      background: #ffffff;
+
+      color: #372116;
+
+      font-size: 15px;
+      line-height: 1.45;
+
+      box-shadow:
+        0 10px 24px
+        rgba(0,0,0,0.30);
+
+      opacity: 0;
+
+      pointer-events: none;
+
+      transform: translateY(6px);
+
+      transition:
+        opacity 0.22s ease,
+        transform 0.22s ease;
+    }
+
+    .info-bubble.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ==================================================
+       POSTUP V MÍSTNOSTI
+       ================================================== */
+
+    .room-progress {
+      position: absolute;
+
+      left: 24px;
+      top: 24px;
+
+      z-index: 50;
+
+      padding: 9px 14px;
+
+      border-radius: 11px;
+
+      background:
+        rgba(47, 28, 15, 0.85);
+
+      border:
+        1px solid
+        rgba(211, 165, 90, 0.7);
+
+      color: #f0d59d;
+
+      font-size: 14px;
+    }
+
+    /* ==================================================
+       DÁLE
+       ================================================== */
+
+    .next-room {
+      position: absolute;
+
+      right: 35px;
+      bottom: 32px;
+
+      z-index: 60;
+
+      padding:
+        12px 31px;
+
+      border:
+        2px solid #f1d698;
+
+      border-radius: 12px;
+
+      background:
+        linear-gradient(
+          145deg,
+          #ca9842,
+          #87551f
+        );
+
+      color: #fff8e8;
+
+      font-size: 19px;
+      font-weight: bold;
+
+      cursor: pointer;
+
+      box-shadow:
+        0 7px 18px
+        rgba(0,0,0,0.35);
+
+      transition:
+        transform 0.2s ease,
+        filter 0.2s ease;
+    }
+
+    .next-room:hover {
+      transform: scale(1.07);
+      filter: brightness(1.12);
+    }
+
+    /* ==================================================
+       ZÁVĚREČNÁ OBRAZOVKA
+       ================================================== */
+
+    .finish-screen {
+      position: absolute;
+      inset: 0;
+
+      z-index: 100;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      background:
+        rgba(27, 14, 7, 0.72);
+    }
+
+    .finish-panel {
+      width:
+        min(560px, 85vw);
+
+      padding:
+        32px;
+
+      border:
+        4px solid #bd8e43;
+
+      border-radius: 22px;
+
+      background:
+        linear-gradient(
+          145deg,
+          #f6e8c6,
+          #d9b774
+        );
+
+      color: #472818;
+
+      text-align: center;
+
+      box-shadow:
+        0 20px 45px
+        rgba(0,0,0,0.5);
+    }
+
+    .finish-panel h2 {
+      margin-bottom: 10px;
+      font-size: 34px;
+    }
+
+    .finish-panel p {
+      margin-bottom: 20px;
+
+      font-size: 17px;
+      line-height: 1.5;
+    }
+
+    .back-life {
+      display: inline-block;
+
+      padding:
+        12px 28px;
+
+      border:
+        2px solid #efd593;
+
+      border-radius: 11px;
+
+      background:
+        linear-gradient(
+          145deg,
+          #bf8a37,
+          #7f4d1b
+        );
+
+      color: white;
+
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 17px;
+
+      box-shadow:
+        0 7px 15px
+        rgba(0,0,0,0.3);
+    }
+
+    .back-life:hover {
+      transform: scale(1.05);
+    }
+
+    @media (max-width: 800px) {
+
+      .player-character {
+        height: 32vh;
+      }
+
+      .guide-message {
+        left: 15%;
+        bottom: 22%;
+        max-width: 290px;
+        font-size: 14px;
+      }
+
+      .top-bar {
+        min-width: 0;
+        width: 65%;
+      }
+
+      .room-title {
+        font-size: 19px;
+      }
+
+      .info-bubble {
+        width: 42vw;
+      }
+
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <main class="game">
+
+    <div
+      class="room-background"
+      id="roomBackground"
+    ></div>
+
+    <div class="room-overlay"></div>
+
+    <!-- horní název -->
+
+    <header class="top-bar">
+
+      <div
+        class="room-counter"
+        id="roomCounter"
+      >
+        MÍSTNOST 1 / 6
+      </div>
+
+      <div
+        class="room-title"
+        id="roomTitle"
+      >
+        ZÁMECKÁ KAPLE
+      </div>
+
+    </header>
+
+    <!-- postup -->
+
+    <div
+      class="room-progress"
+      id="roomProgress"
+    >
+      Prozkoumáno: 0 / 3
+    </div>
+
+    <!-- hráč -->
+
+    <img
+      class="player-character"
+      id="playerCharacter"
+      src=""
+      alt="Hráčova postava"
+    >
+
+    <!-- instrukční bublina -->
+
+    <div
+      class="guide-message"
+      id="guideMessage"
+    >
+      Vítej v životě barokní šlechty.
+      V každém prostoru najdi všechna zářící místa
+      a zjisti něco o životě na zámku.
+    </div>
+
+    <!-- hotspoty -->
+
+    <div
+      class="hotspots"
+      id="hotspots"
+    ></div>
+
+    <!-- informace -->
+
+    <div
+      class="info-bubble"
+      id="infoBubble"
+    ></div>
+
+    <!-- další místnost -->
+
+    <button
+      class="next-room"
+      id="nextRoom"
+      hidden
+    >
+      DÁLE
+    </button>
+
+    <!-- konec -->
+
+    <section
+      class="finish-screen"
+      id="finishScreen"
+      hidden
+    >
+
+      <div class="finish-panel">
+
+        <h2>
+          Život šlechty prozkoumán
+        </h2>
+
+        <p>
+          Prošel/prošla jsi zámeckou kaplí,
+          jídelnou, tanečním sálem, divadlem,
+          parkem i stájemi.
+        </p>
+
+        <a
+          href="life.html"
+          class="back-life"
+        >
+          ZPĚT NA ROZCESTÍ
+        </a>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <script>
+
+    /* ==================================================
+       HRÁČOVA POSTAVA
+       ================================================== */
+
+    const playerCharacter =
+      document.getElementById(
+        "playerCharacter"
+      );
+
+    const storedCharacter =
+      localStorage.getItem(
+        "obleceniObrazek"
+      );
+
+    if (storedCharacter) {
+
+      playerCharacter.src =
+        storedCharacter;
+
+    } else {
+
+      playerCharacter.style.display =
+        "none";
+
+    }
+
+
+    /* ==================================================
+       MÍSTNOSTI
+       ================================================== */
+
+    const rooms = [
+
+      /* ==================================================
+         KAPLE
+         ================================================== */
+
+      {
+        title:
+          "ZÁMECKÁ KAPLE",
+
+        image:
+          "images/slechta-kaple.jpg",
+
+        intro:
+          "Součástí mnoha šlechtických sídel byla vlastní kaple. Prozkoumej ji.",
+
+        hotspots: [
+
+          {
+            x: 50,
+            y: 44,
+
+            icon: "✝",
+
+            text:
+              "Kaple sloužila šlechtické rodině k bohoslužbám a soukromým náboženským obřadům."
+          },
+
+          {
+            x: 33,
+            y: 62,
+
+            icon: "🕯",
+
+            text:
+              "Náboženství hrálo v barokní společnosti velmi významnou roli."
+          },
+
+          {
+            x: 70,
+            y: 58,
+
+            icon: "⛪",
+
+            text:
+              "Šlechtická sídla mohla mít vlastní bohatě zdobené zámecké kaple."
+          }
+
+        ]
+      },
+
+
+      /* ==================================================
+         JÍDELNA
+         ================================================== */
+
+      {
+        title:
+          "ZÁMECKÁ JÍDELNA",
+
+        image:
+          "images/slechta-jidelna.jpg",
+
+        intro:
+          "Šlechtické hostiny byly důležitou součástí společenského života. Podívej se na stůl.",
+
+        hotspots: [
+
+          {
+            x: 68,
+            y: 70,
+
+            icon: "🍖",
+
+            text:
+              "Maso patřilo mezi oblíbené pokrmy bohatších vrstev společnosti."
+          },
+
+          {
+            x: 57,
+            y: 80,
+
+            icon: "🍴",
+
+            text:
+              "V době baroka se při stolování stále více rozšiřovalo používání vidličky."
+          },
+
+          {
+            x: 85,
+            y: 90,
+
+            icon: "☕",
+
+            text:
+              "Na konci 17. století se mezi vyššími vrstvami začalo stávat módním pití kávy."
+          },
+
+          {
+            x: 50,
+            y: 65,
+
+            icon: "🥔",
+
+            text:
+              "Mezi nové významné potraviny patřily také brambory, i když jejich rozšíření bylo postupné."
+          }
+
+        ]
+      },
+
+
+      /* ==================================================
+         TANEČNÍ SÁL
+         ================================================== */
+
+      {
+        title:
+          "TANEČNÍ SÁL",
+
+        image:
+          "images/slechta-tanecni-sal.jpg",
+
+        intro:
+          "Plesy a slavnosti patřily k oblíbené zábavě šlechty.",
+
+        hotspots: [
+
+          {
+            x: 38,
+            y: 58,
+
+            icon: "💃",
+
+            text:
+              "Na plesech se tančilo a šlechta zde také navazovala společenské kontakty."
+          },
+
+          {
+            x: 62,
+            y: 57,
+
+            icon: "🎻",
+
+            text:
+              "Hudba doprovázela plesy, slavnosti i další společenské události."
+          },
+
+          {
+            x: 50,
+            y: 26,
+
+            icon: "✦",
+
+            text:
+              "Velké reprezentační sály byly bohatě zdobené a měly ukazovat majetek a postavení majitele."
+          }
+
+        ]
+      },
+
+
+      /* ==================================================
+         DIVADLO
+         ================================================== */
+
+      {
+        title:
+          "ZÁMECKÉ DIVADLO",
+
+        image:
+          "images/slechta-divadlo.jpg",
+
+        intro:
+          "Některé šlechtické zámky měly vlastní divadlo.",
+
+        hotspots: [
+
+          {
+            x: 50,
+            y: 80,
+
+            icon: "🎭",
+
+            text:
+              "Divadelní představení byla oblíbenou součástí šlechtické zábavy."
+          },
+
+          {
+            x: 34,
+            y: 39,
+
+            icon: "🎼",
+
+            text:
+              "V období baroka se výrazně rozvíjela také opera."
+          },
+
+          {
+            x: 71,
+            y: 46,
+
+            icon: "👑",
+
+            text:
+              "Představení se hrála pro šlechtu a její hosty přímo v zámeckých sálech nebo divadlech."
+          }
+
+        ]
+      },
+
+
+      /* ==================================================
+         PARK
+         ================================================== */
+
+      {
+        title:
+          "ZÁMECKÝ PARK",
+
+        image:
+          "images/slechta-park.jpg",
+
+        intro:
+          "Okolí zámků často doplňovaly rozsáhlé a pečlivě upravené parky.",
+
+        hotspots: [
+
+          {
+            x: 35,
+            y: 55,
+
+            icon: "🌳",
+
+            text:
+              "Zámecké parky byly upravovány pomocí cest, alejí a pravidelně uspořádané zeleně."
+          },
+
+          {
+            x: 50,
+            y: 55,
+
+            icon: "⛲",
+
+            text:
+              "Parky zdobily fontány, sochy a další dekorativní prvky."
+          },
+
+          {
+            x: 72,
+            y: 54,
+
+            icon: "🌿",
+
+            text:
+              "Park sloužil nejen k reprezentaci, ale také k procházkám a odpočinku."
+          }
+
+        ]
+      },
+
+
+      /* ==================================================
+         STÁJE
+         ================================================== */
+
+      {
+        title:
+          "STÁJE A KOČÁRY",
+
+        image:
+          "images/slechta-staje.jpg",
+
+        intro:
+          "Koně a kočáry patřily k životu bohaté šlechty.",
+
+        hotspots: [
+
+          {
+            x: 32,
+            y: 57,
+
+            icon: "🐎",
+
+            text:
+              "Jízda na koni patřila mezi oblíbené šlechtické aktivity."
+          },
+
+          {
+            x: 20,
+            y: 30,
+
+            icon: "🛞",
+
+            text:
+              "Kočáry sloužily šlechtě k cestování a zároveň mohly ukazovat společenské postavení."
+          },
+
+          {
+            x: 78,
+            y: 53,
+
+            icon: "👤",
+
+            text:
+              "O koně, kočáry i chod zámku se staralo početné služebnictvo."
+          }
+
+        ]
+      }
+
+    ];
+
+
+    /* ==================================================
+       PRVKY
+       ================================================== */
+
+    const roomBackground =
+      document.getElementById(
+        "roomBackground"
+      );
+
+    const roomTitle =
+      document.getElementById(
+        "roomTitle"
+      );
+
+    const roomCounter =
+      document.getElementById(
+        "roomCounter"
+      );
+
+    const roomProgress =
+      document.getElementById(
+        "roomProgress"
+      );
+
+    const guideMessage =
+      document.getElementById(
+        "guideMessage"
+      );
+
+    const hotspotsElement =
+      document.getElementById(
+        "hotspots"
+      );
+
+    const infoBubble =
+      document.getElementById(
+        "infoBubble"
+      );
+
+    const nextRoom =
+      document.getElementById(
+        "nextRoom"
+      );
+
+    const finishScreen =
+      document.getElementById(
+        "finishScreen"
+      );
+
+
+    let currentRoom =
+      0;
+
+    let visitedHotspots =
+      new Set();
+
+
+    /* ==================================================
+       NAČTENÍ MÍSTNOSTI
+       ================================================== */
+
+    function loadRoom() {
+
+      const room =
+        rooms[currentRoom];
+
+
+      visitedHotspots =
+        new Set();
+
+
+      roomBackground.style.backgroundImage =
+        `url("${room.image}")`;
+
+
+      roomTitle.textContent =
+        room.title;
+
+
+      roomCounter.textContent =
+        "MÍSTNOST "
+        + (currentRoom + 1)
+        + " / "
+        + rooms.length;
+
+
+      roomProgress.textContent =
+        "Prozkoumáno: 0 / "
+        + room.hotspots.length;
+
+
+      guideMessage.textContent =
+        room.intro;
+
+
+      nextRoom.hidden =
+        true;
+
+
+      infoBubble.classList.remove(
+        "visible"
+      );
+
+
+      hotspotsElement.innerHTML =
+        "";
+
+
+      room.hotspots.forEach(
+        function (hotspot, index) {
+
+          const button =
+            document.createElement(
+              "button"
+            );
+
+
+          button.className =
+            "hotspot";
+
+
+          button.type =
+            "button";
+
+
+          button.textContent =
+            hotspot.icon;
+
+
+          button.style.left =
+            hotspot.x + "%";
+
+
+          button.style.top =
+            hotspot.y + "%";
+
+
+          button.style.transform =
+            "translate(-50%, -50%)";
+
+
+          button.addEventListener(
+            "click",
+            function () {
+
+              showHotspotInfo(
+                button,
+                hotspot,
+                index
+              );
+
+            }
+          );
+
+
+          hotspotsElement.appendChild(
+            button
+          );
+
+        }
+      );
+
+    }
+
+
+    /* ==================================================
+       KLIKNUTÍ NA HOTSPOT
+       ================================================== */
+
+    function showHotspotInfo(
+      button,
+      hotspot,
+      index
+    ) {
+
+      visitedHotspots.add(
+        index
+      );
+
+
+      button.classList.add(
+        "visited"
+      );
+
+
+      infoBubble.textContent =
+        hotspot.text;
+
+
+      let bubbleX =
+        hotspot.x + 4;
+
+
+      let bubbleY =
+        hotspot.y - 14;
+
+
+      if (
+        bubbleX > 68
+      ) {
+
+        bubbleX =
+          hotspot.x - 28;
+
+      }
+
+
+      if (
+        bubbleY < 15
+      ) {
+
+        bubbleY =
+          hotspot.y + 8;
+
+      }
+
+
+      infoBubble.style.left =
+        bubbleX + "%";
+
+
+      infoBubble.style.top =
+        bubbleY + "%";
+
+
+      infoBubble.classList.add(
+        "visible"
+      );
+
+
+      const room =
+        rooms[currentRoom];
+
+
+      roomProgress.textContent =
+        "Prozkoumáno: "
+        + visitedHotspots.size
+        + " / "
+        + room.hotspots.length;
+
+
+      if (
+        visitedHotspots.size ===
+        room.hotspots.length
+      ) {
+
+        guideMessage.textContent =
+          "Výborně! Tuto část zámku už znáš.";
+
+
+        nextRoom.hidden =
+          false;
+
+      }
+
+    }
+
+
+    /* ==================================================
+       DALŠÍ MÍSTNOST
+       ================================================== */
+
+    nextRoom.addEventListener(
+      "click",
+      function () {
+
+        if (
+          currentRoom <
+          rooms.length - 1
+        ) {
+
+          currentRoom++;
+
+          loadRoom();
+
+        } else {
+
+          completeNobility();
+
+        }
+
+      }
+    );
+
+
+    /* ==================================================
+       DOKONČENÍ ŠLECHTY
+       ================================================== */
+
+    function completeNobility() {
+
+      localStorage.setItem(
+        "life_slechta",
+        "completed"
+      );
+
+
+      finishScreen.hidden =
+        false;
+
+    }
+
+
+    /* ==================================================
+       START
+       ================================================== */
+
+    loadRoom();
+
+  </script>
+
+</body>
+
+</html>

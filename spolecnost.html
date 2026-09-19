@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="cs">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Baroko – Společnost</title>
+
+  <style>
+    /* ==================================================
+       ZÁKLAD
+       ================================================== */
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: Georgia, "Times New Roman", serif;
+      background: #2d1c12;
+    }
+
+    button {
+      font-family: Georgia, "Times New Roman", serif;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    /* ==================================================
+       HLAVNÍ SCÉNA
+       ================================================== */
+
+    .society-scene {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+
+      background-image:
+        linear-gradient(rgba(35, 20, 8, 0.08), rgba(35, 20, 8, 0.18)),
+        url("images/barokni-namesti.png");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    .scene-title {
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 60;
+
+      padding: 8px 20px;
+      border-radius: 12px;
+      background: rgba(75, 43, 22, 0.82);
+
+      color: #f8e4b4;
+      font-size: 19px;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      text-shadow: 0 3px 7px rgba(0, 0, 0, 0.8);
+    }
+
+    .intro-message {
+      position: absolute;
+      top: 7%;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 55;
+
+      width: min(700px, 72vw);
+      padding: 16px 24px;
+
+      border: 3px solid #b6843d;
+      border-radius: 18px;
+      background: linear-gradient(145deg,
+          rgba(251, 243, 222, 0.97),
+          rgba(231, 205, 160, 0.97));
+
+      color: #51321e;
+      text-align: center;
+      font-size: 16px;
+      line-height: 1.45;
+      box-shadow: 0 12px 26px rgba(0, 0, 0, 0.32);
+    }
+
+    /* ==================================================
+       POSTAVY – VOLNĚ VE SCÉNĚ
+       ================================================== */
+
+    .society-figures {
+      position: absolute;
+      inset: 0;
+      z-index: 12;
+    }
+
+    .society-figure {
+      position: absolute;
+      background: transparent;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      z-index: 12;
+      transition:
+        transform 0.25s ease,
+        filter 0.25s ease,
+        opacity 0.4s ease;
+    }
+
+    .society-figure img {
+      display: block;
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+      pointer-events: none;
+      filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.28));
+    }
+
+    .society-figure:hover {
+      transform: scale(1.04);
+      z-index: 20;
+    }
+
+    .society-figure.visited img {
+      filter:
+        drop-shadow(0 0 0 rgba(0, 0, 0, 0))
+        drop-shadow(0 0 12px rgba(255, 227, 140, 0.95))
+        drop-shadow(0 8px 14px rgba(0, 0, 0, 0.30));
+    }
+
+    .figure-name {
+      position: absolute;
+      left: 50%;
+      bottom: -22px;
+      transform: translateX(-50%);
+
+      padding: 4px 10px;
+      border-radius: 10px;
+
+      background: rgba(247, 236, 208, 0.92);
+      border: 1px solid rgba(171, 126, 55, 0.8);
+
+      color: #4f2e1a;
+      font-size: 14px;
+      font-weight: bold;
+      white-space: nowrap;
+
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.18);
+      pointer-events: none;
+    }
+
+    /* velikosti podle "hloubky" */
+    .depth-far {
+      width: 140px;
+    }
+
+    .depth-mid {
+      width: 160px;
+    }
+
+    .depth-near {
+      width: 200px;
+    }
+
+    /* rozmístění */
+    .figure-ruler {
+      left: 37%;
+      top: 40%;
+    }
+
+    .figure-nobility {
+      left: 15%;
+      top: 40%;
+    }
+
+    .figure-church {
+      right: 25%;
+      top: 45%;
+      width: 140px
+    }
+
+    .figure-burghers {
+      left: 25%;
+      bottom: 12%;
+    }
+
+    .figure-peasants {
+      right: 40%;
+      bottom: 20%;
+    }
+
+    .figure-poor {
+      right: 7%;
+      bottom: 13%;
+    }
+
+    /* ==================================================
+       BÍLÁ MLUVÍCÍ BUBLINA
+       ================================================== */
+
+    .figure-speech {
+      position: absolute;
+      z-index: 45;
+
+      width: min(330px, 30vw);
+      min-height: 72px;
+
+      padding: 14px 18px;
+
+      border: 2px solid #d8d8d8;
+      border-radius: 22px;
+      background: #ffffff;
+
+      color: #362114;
+      font-size: 15px;
+      line-height: 1.4;
+
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.24);
+
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(6px);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    .figure-speech.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .figure-speech::after {
+      content: "";
+      position: absolute;
+      left: 34px;
+      bottom: -16px;
+
+      width: 0;
+      height: 0;
+
+      border-left: 13px solid transparent;
+      border-right: 13px solid transparent;
+      border-top: 17px solid #ffffff;
+    }
+
+    /* ==================================================
+       POČÍTADLO A TROJÚHELNÍK
+       ================================================== */
+
+    .visited-counter {
+      position: absolute;
+      left: 22px;
+      bottom: 20px;
+      z-index: 30;
+
+      padding: 9px 15px;
+      border-radius: 12px;
+      background: rgba(68, 39, 20, 0.82);
+
+      color: #f6e2b2;
+      font-size: 14px;
+
+      box-shadow: 0 7px 15px rgba(0, 0, 0, 0.25);
+    }
+
+    .hierarchy-trigger {
+      position: absolute;
+      right: 4%;
+      top: 48%;
+      z-index: 50;
+
+      width: 90px;
+      height: 90px;
+
+      border: 3px solid #d5aa58;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #f4dfae, #bd8535);
+
+      color: #603819;
+      font-size: 47px;
+
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.38);
+
+      animation: trianglePulse 1.5s infinite alternate;
+      transition: transform 0.25s ease, filter 0.25s ease;
+    }
+
+    .hierarchy-trigger:hover {
+      transform: scale(1.10);
+      filter: brightness(1.08);
+    }
+
+    @keyframes trianglePulse {
+      from {
+        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.30);
+      }
+
+      to {
+        box-shadow: 0 0 25px rgba(255, 215, 105, 0.95);
+      }
+    }
+
+    /* ==================================================
+       ÚKOL 2
+       ================================================== */
+
+    .hierarchy-task {
+      position: absolute;
+      inset: 0;
+      z-index: 70;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      background: rgba(31, 18, 9, 0.62);
+    }
+
+    .hierarchy-panel {
+      width: min(1050px, 90vw);
+      max-height: 94vh;
+      padding: 20px 26px;
+
+      border: 4px solid #b78339;
+      border-radius: 22px;
+      background: linear-gradient(145deg, #f7ebce, #ddbd80);
+
+      box-shadow: 0 20px 55px rgba(0, 0, 0, 0.55);
+      text-align: center;
+      color: #492919;
+    }
+
+    .task-label {
+      margin-bottom: 2px;
+      color: #9a6b2b;
+      font-size: 13px;
+      font-weight: bold;
+      letter-spacing: 3px;
+    }
+
+    .hierarchy-panel h2 {
+      margin-bottom: 5px;
+      font-size: 31px;
+    }
+
+    .hierarchy-instruction {
+      margin-bottom: 14px;
+      font-size: 15px;
+    }
+
+    .hierarchy-cards {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+
+    .hierarchy-card {
+      width: 132px;
+      padding: 7px 8px;
+
+      border: 2px solid #b58642;
+      border-radius: 10px;
+      background: #fff7e5;
+
+      color: #482817;
+      cursor: grab;
+
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.16);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .hierarchy-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.23);
+    }
+
+    .hierarchy-card.selected {
+      border-color: #875916;
+      box-shadow: 0 0 0 4px rgba(198, 149, 52, 0.36);
+    }
+
+    .hierarchy-card .mini-icon {
+      display: block;
+      font-size: 30px;
+      line-height: 1;
+    }
+
+    .hierarchy-card strong {
+      display: block;
+      margin-top: 3px;
+      font-size: 13px;
+    }
+
+    .pyramid {
+      width: min(720px, 80vw);
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .pyramid-level {
+      min-height: 65px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 7px;
+
+      padding: 7px 14px;
+      border: 3px dashed rgba(109, 70, 29, 0.60);
+      background: rgba(255, 249, 231, 0.52);
+
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .pyramid-level.drag-over {
+      background: rgba(255, 222, 138, 0.8);
+      border-color: #c3892d;
+    }
+
+    .level-1 {
+      width: 32%;
+    }
+
+    .level-2 {
+      width: 54%;
+    }
+
+    .level-3 {
+      width: 76%;
+    }
+
+    .level-4 {
+      width: 100%;
+    }
+
+    .level-name {
+      width: 100%;
+      color: #8b6538;
+      font-size: 11px;
+      letter-spacing: 1px;
+    }
+
+    .pyramid-level .hierarchy-card {
+      width: 120px;
+      padding: 5px 7px;
+      cursor: default;
+    }
+
+    .pyramid-level .mini-icon {
+      font-size: 23px;
+    }
+
+    .hierarchy-feedback {
+      min-height: 20px;
+      margin-top: 9px;
+      font-size: 15px;
+      font-weight: bold;
+    }
+
+    .next-button {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 10px 30px;
+
+      border: 2px solid #f0d38f;
+      border-radius: 11px;
+      background: linear-gradient(145deg, #c89843, #87561f);
+
+      color: #fff8e7;
+      font-size: 18px;
+      font-weight: bold;
+
+      cursor: pointer;
+
+      box-shadow: 0 7px 16px rgba(0, 0, 0, 0.30);
+      transition: transform 0.25s ease, filter 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .next-button:hover {
+      transform: scale(1.07);
+      filter: brightness(1.08);
+      box-shadow: 0 10px 23px rgba(0, 0, 0, 0.40);
+    }
+
+    /* ==================================================
+       ÚKOL 3
+       ================================================== */
+
+    .who-task {
+      position: absolute;
+      inset: 0;
+      z-index: 80;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      background: rgba(33, 19, 9, 0.63);
+    }
+
+    .who-panel {
+      width: min(680px, 82vw);
+      padding: 27px 32px;
+
+      border: 4px solid #b5833b;
+      border-radius: 22px;
+      background: linear-gradient(145deg, #f9edcf, #ddbd83);
+
+      color: #482819;
+      text-align: center;
+
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.52);
+    }
+
+    .who-panel h2 {
+      margin-bottom: 8px;
+      font-size: 34px;
+    }
+
+    .who-progress {
+      margin-bottom: 16px;
+      color: #8b6029;
+      font-size: 13px;
+      font-weight: bold;
+      letter-spacing: 2px;
+    }
+
+    .who-question {
+      margin-bottom: 20px;
+      padding: 17px 20px;
+
+      border: 2px solid #c39a5f;
+      border-radius: 14px;
+      background: rgba(255, 249, 233, 0.70);
+
+      font-size: 18px;
+      line-height: 1.45;
+    }
+
+    .who-options {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .who-option {
+      min-height: 52px;
+      padding: 10px 12px;
+
+      border: 2px solid #b98844;
+      border-radius: 11px;
+      background: #fff8e8;
+
+      color: #482817;
+      font-size: 15px;
+
+      cursor: pointer;
+      transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .who-option:hover {
+      transform: scale(1.025);
+      background: #ffedc5;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
+    }
+
+    .who-feedback {
+      min-height: 25px;
+      margin-top: 14px;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .task-complete {
+      margin-top: 12px;
+      padding: 14px;
+
+      border: 2px solid #b38742;
+      border-radius: 14px;
+      background: rgba(255, 247, 218, 0.75);
+
+      font-size: 18px;
+      line-height: 1.4;
+    }
+
+    @media (max-width: 1000px) {
+      .depth-far {
+        width: 75px;
+      }
+
+      .depth-mid {
+        width: 105px;
+      }
+
+      .depth-near {
+        width: 140px;
+      }
+
+      .figure-name {
+        font-size: 12px;
+      }
+
+      .figure-speech {
+        width: min(290px, 38vw);
+      }
+    }
+
+    @media (max-width: 760px) {
+      .intro-message {
+        width: 88vw;
+        font-size: 14px;
+      }
+
+      .scene-title {
+        font-size: 15px;
+        letter-spacing: 3px;
+      }
+
+      .who-options {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="society-scene">
+
+    <div class="scene-title">
+      SPOLEČNOST V DOBĚ BAROKA
+    </div>
+
+    <div class="intro-message" id="introMessage">
+      Barokní společnost tvořily různé skupiny obyvatel.
+      Klikni postupně na všechny postavy na náměstí a zjisti, koho představují.
+    </div>
+
+    <!-- ==================================================
+         ÚKOL 1 – POSTAVY
+         ================================================== -->
+
+    <section class="society-figures" id="societyFigures">
+
+      <button
+        class="society-figure figure-ruler depth-far"
+        data-id="ruler"
+        data-text="Jsem panovník – stojím v čele státu a v některých zemích je moje moc omezena parlamentem."
+      >
+        <img src="images/panovnik.png" alt="Panovník">
+        <span class="figure-name">Panovník</span>
+      </button>
+
+      <button
+        class="society-figure figure-nobility depth-mid"
+        data-id="nobility"
+        data-text="Představuji šlechtu – patříme mezi nejvlivnější vrstvy a vlastníme velkou část půdy."
+      >
+        <img src="images/slechta.png" alt="Šlechta">
+        <span class="figure-name">Šlechta</span>
+      </button>
+
+      <button
+        class="society-figure figure-church depth-mid"
+        data-id="church"
+        data-text="Představuji církev – patříme k významným a majetným vrstvám a ovlivňujeme náboženský i společenský život."
+      >
+        <img src="images/cirkev.png" alt="Církev">
+        <span class="figure-name">Církev</span>
+      </button>
+
+      <button
+        class="society-figure figure-burghers depth-near"
+        data-id="burghers"
+        data-text="Jsem měšťan – žiji ve městě a mezi námi jsou řemeslníci, obchodníci i velmi majetní lidé."
+      >
+        <img src="images/mestan.png" alt="Měšťané">
+        <span class="figure-name">Měšťané</span>
+      </button>
+
+      <button
+        class="society-figure figure-peasants depth-near"
+        data-id="peasants"
+        data-text="Jsem venkovan – živím se převážně zemědělstvím a mnoho z nás patří mezi poddané."
+      >
+        <img src="images/venkovan.png" alt="Venkované">
+        <span class="figure-name">Venkované</span>
+      </button>
+
+      <button
+        class="society-figure figure-poor depth-near"
+        data-id="poor"
+        data-text="Patřím k městské chudině – žiji ve městě, ale nemám téměř žádný majetek a patřím k nejchudším obyvatelům."
+      >
+        <img src="images/mestska-chudina.png" alt="Městská chudina">
+        <span class="figure-name">Městská chudina</span>
+      </button>
+
+    </section>
+
+    <div class="figure-speech" id="figureSpeech"></div>
+
+    <div class="visited-counter" id="visitedCounter">
+      Prozkoumáno: 0 / 6
+    </div>
+
+    <button class="hierarchy-trigger" id="hierarchyTrigger" title="Otevřít hierarchii" hidden>
+      △
+    </button>
+
+    <!-- ==================================================
+         ÚKOL 2
+         ================================================== -->
+
+    <section class="hierarchy-task" id="hierarchyTask" hidden>
+      <div class="hierarchy-panel">
+
+        <div class="task-label">ÚKOL 2</div>
+        <h2>Poskládej společnost</h2>
+
+        <p class="hierarchy-instruction">
+          Umísti jednotlivé skupiny na správnou úroveň společenské hierarchie.
+          Karty můžeš přetáhnout nebo nejprve kliknout na kartu a potom na úroveň.
+        </p>
+
+        <div class="hierarchy-cards" id="hierarchyCards">
+
+          <div class="hierarchy-card" draggable="true" data-id="peasants" data-level="4">
+            <span class="mini-icon">🌾</span>
+            <strong>Venkované</strong>
+          </div>
+
+          <div class="hierarchy-card" draggable="true" data-id="church" data-level="2">
+            <span class="mini-icon">⛪</span>
+            <strong>Církev</strong>
+          </div>
+
+          <div class="hierarchy-card" draggable="true" data-id="ruler" data-level="1">
+            <span class="mini-icon">👑</span>
+            <strong>Panovník</strong>
+          </div>
+
+          <div class="hierarchy-card" draggable="true" data-id="poor" data-level="4">
+            <span class="mini-icon">🧺</span>
+            <strong>Městská chudina</strong>
+          </div>
+
+          <div class="hierarchy-card" draggable="true" data-id="nobility" data-level="2">
+            <span class="mini-icon">🎩</span>
+            <strong>Šlechta</strong>
+          </div>
+
+          <div class="hierarchy-card" draggable="true" data-id="burghers" data-level="3">
+            <span class="mini-icon">🏠</span>
+            <strong>Měšťané</strong>
+          </div>
+
+        </div>
+
+        <div class="pyramid">
+
+          <div class="pyramid-level level-1" data-level="1">
+            <span class="level-name">VRCHOL</span>
+          </div>
+
+          <div class="pyramid-level level-2" data-level="2">
+            <span class="level-name">VÝZNAMNÉ A VLIVNÉ VRSTVY</span>
+          </div>
+
+          <div class="pyramid-level level-3" data-level="3">
+            <span class="level-name">MĚSTSKÉ OBYVATELSTVO</span>
+          </div>
+
+          <div class="pyramid-level level-4" data-level="4">
+            <span class="level-name">NEJPOČETNĚJŠÍ A CHUDŠÍ VRSTVY</span>
+          </div>
+
+        </div>
+
+        <div class="hierarchy-feedback" id="hierarchyFeedback"></div>
+
+        <button class="next-button" id="nextToWho" hidden>
+          DÁLE
+        </button>
+
+      </div>
+    </section>
+
+    <!-- ==================================================
+         ÚKOL 3
+         ================================================== -->
+
+    <section class="who-task" id="whoTask" hidden>
+      <div class="who-panel">
+
+        <div class="task-label">ÚKOL 3</div>
+        <h2>Kdo jsem?</h2>
+
+        <div class="who-progress" id="whoProgress"></div>
+        <div class="who-question" id="whoQuestion"></div>
+        <div class="who-options" id="whoOptions"></div>
+        <div class="who-feedback" id="whoFeedback"></div>
+
+        <div class="task-complete" id="taskComplete" hidden>
+          <strong>Výborně!</strong>
+          <br>
+          Znáš základní vrstvy barokní společnosti
+          a dokážeš je rozeznat podle jejich postavení.
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    /* ==================================================
+       ÚKOL 1
+       ================================================== */
+
+    const figures =
+      document.querySelectorAll(".society-figure");
+
+    const figureSpeech =
+      document.getElementById("figureSpeech");
+
+    const visitedCounter =
+      document.getElementById("visitedCounter");
+
+    const hierarchyTrigger =
+      document.getElementById("hierarchyTrigger");
+
+    const introMessage =
+      document.getElementById("introMessage");
+
+    const scene =
+      document.querySelector(".society-scene");
+
+    const visitedFigures =
+      new Set();
+
+    figures.forEach(function (figure) {
+      figure.addEventListener("click", function () {
+        const id = figure.dataset.id;
+        const text = figure.dataset.text;
+
+        figureSpeech.textContent = text;
+
+        const figureRect = figure.getBoundingClientRect();
+        const sceneRect = scene.getBoundingClientRect();
+
+        let bubbleLeft =
+          figureRect.left - sceneRect.left + figureRect.width * 0.45;
+
+        let bubbleTop =
+          figureRect.top - sceneRect.top - 110;
+
+        const bubbleWidth = 330;
+        const sceneWidth = sceneRect.width;
+
+        if (bubbleLeft + bubbleWidth > sceneWidth - 15) {
+          bubbleLeft = sceneWidth - bubbleWidth - 15;
+        }
+
+        if (bubbleLeft < 15) {
+          bubbleLeft = 15;
+        }
+
+        if (bubbleTop < 90) {
+          bubbleTop = figureRect.bottom - sceneRect.top + 8;
+          figureSpeech.style.setProperty("--tail-mode", "top");
+        }
+
+        figureSpeech.style.left = bubbleLeft + "px";
+        figureSpeech.style.top = bubbleTop + "px";
+        figureSpeech.classList.add("visible");
+
+        visitedFigures.add(id);
+        figure.classList.add("visited");
+
+        visitedCounter.textContent =
+          "Prozkoumáno: " + visitedFigures.size + " / 6";
+
+        if (visitedFigures.size === 6) {
+          hierarchyTrigger.hidden = false;
+          introMessage.textContent =
+            "Výborně! Prozkoumal/a jsi všechny skupiny. Klikni na symbol trojúhelníku a poskládej společnost podle hierarchie.";
+        }
+      });
+    });
+
+    /* ==================================================
+       OTEVŘENÍ ÚKOLU 2
+       ================================================== */
+
+    const hierarchyTask =
+      document.getElementById("hierarchyTask");
+
+    hierarchyTrigger.addEventListener("click", function () {
+      figureSpeech.classList.remove("visible");
+      hierarchyTask.hidden = false;
+    });
+
+    /* ==================================================
+       ÚKOL 2 – HIERARCHIE
+       ================================================== */
+
+    const hierarchyCards =
+      document.querySelectorAll(".hierarchy-card");
+
+    const pyramidLevels =
+      document.querySelectorAll(".pyramid-level");
+
+    const hierarchyFeedback =
+      document.getElementById("hierarchyFeedback");
+
+    const nextToWho =
+      document.getElementById("nextToWho");
+
+    let draggedCard = null;
+    let selectedCard = null;
+    let hierarchyCorrect = 0;
+
+    hierarchyCards.forEach(function (card) {
+      card.addEventListener("click", function () {
+        if (card.parentElement.classList.contains("pyramid-level")) {
+          return;
+        }
+
+        hierarchyCards.forEach(function (otherCard) {
+          otherCard.classList.remove("selected");
+        });
+
+        selectedCard = card;
+        card.classList.add("selected");
+      });
+
+      card.addEventListener("dragstart", function () {
+        draggedCard = card;
+      });
+    });
+
+    pyramidLevels.forEach(function (level) {
+      level.addEventListener("dragover", function (event) {
+        event.preventDefault();
+        level.classList.add("drag-over");
+      });
+
+      level.addEventListener("dragleave", function () {
+        level.classList.remove("drag-over");
+      });
+
+      level.addEventListener("drop", function (event) {
+        event.preventDefault();
+        level.classList.remove("drag-over");
+
+        if (!draggedCard) return;
+
+        placeHierarchyCard(draggedCard, level);
+        draggedCard = null;
+      });
+
+      level.addEventListener("click", function () {
+        if (!selectedCard) return;
+
+        placeHierarchyCard(selectedCard, level);
+        selectedCard.classList.remove("selected");
+        selectedCard = null;
+      });
+    });
+
+    function placeHierarchyCard(card, level) {
+      const correctLevel = card.dataset.level;
+      const targetLevel = level.dataset.level;
+
+      if (correctLevel === targetLevel) {
+        level.appendChild(card);
+        card.draggable = false;
+        card.classList.remove("selected");
+
+        hierarchyCorrect++;
+
+        hierarchyFeedback.style.color = "#4f7128";
+        hierarchyFeedback.textContent = "✓ Správně!";
+
+        if (hierarchyCorrect === 6) {
+          hierarchyFeedback.textContent =
+            "✓ Výborně! Společenská hierarchie je správně sestavena.";
+          nextToWho.hidden = false;
+        }
+      } else {
+        hierarchyFeedback.style.color = "#982f22";
+        hierarchyFeedback.textContent =
+          "✕ Tato skupina patří na jinou úroveň.";
+      }
+    }
+
+    /* ==================================================
+       PŘECHOD NA ÚKOL 3
+       ================================================== */
+
+    const whoTask =
+      document.getElementById("whoTask");
+
+    nextToWho.addEventListener("click", function () {
+      hierarchyTask.hidden = true;
+      whoTask.hidden = false;
+      showWhoQuestion();
+    });
+
+    /* ==================================================
+       ÚKOL 3 – KDO JSEM?
+       ================================================== */
+
+    const whoQuestion =
+      document.getElementById("whoQuestion");
+
+    const whoOptions =
+      document.getElementById("whoOptions");
+
+    const whoFeedback =
+      document.getElementById("whoFeedback");
+
+    const whoProgress =
+      document.getElementById("whoProgress");
+
+    const taskComplete =
+      document.getElementById("taskComplete");
+
+    const whoQuestions = [
+      {
+        text: "Stojím v čele státu. V některých zemích mám velmi silnou moc, jinde ji může omezovat parlament.",
+        answer: "Panovník"
+      },
+      {
+        text: "Patřím mezi nejvlivnější vrstvy společnosti a vlastním velkou část zemědělské půdy.",
+        answer: "Šlechta"
+      },
+      {
+        text: "Patřím k významným a majetným vrstvám a mám velký vliv na náboženský život.",
+        answer: "Církev"
+      },
+      {
+        text: "Žiji ve městě. Mohu být řemeslníkem nebo obchodníkem a někteří z nás jsou velmi majetní.",
+        answer: "Měšťané"
+      },
+      {
+        text: "Žiji na venkově a živím se převážně prací v zemědělství.",
+        answer: "Venkované"
+      },
+      {
+        text: "Žiji ve městě, ale nemám téměř žádný majetek a patřím k nejchudším obyvatelům.",
+        answer: "Městská chudina"
+      }
+    ];
+
+    const whoNames = [
+      "Panovník",
+      "Šlechta",
+      "Církev",
+      "Měšťané",
+      "Venkované",
+      "Městská chudina"
+    ];
+
+    let currentWho = 0;
+
+    function showWhoQuestion() {
+      if (currentWho >= whoQuestions.length) {
+        whoQuestion.hidden = true;
+        whoOptions.hidden = true;
+        whoProgress.hidden = true;
+        whoFeedback.textContent = "";
+        taskComplete.hidden = false;
+        return;
+      }
+
+      const question = whoQuestions[currentWho];
+
+      whoProgress.textContent =
+        "OTÁZKA " +
+        (currentWho + 1) +
+        " / " +
+        whoQuestions.length;
+
+      whoQuestion.textContent = question.text;
+      whoOptions.innerHTML = "";
+      whoFeedback.textContent = "";
+
+      const shuffled = [...whoNames].sort(function () {
+        return Math.random() - 0.5;
+      });
+
+      shuffled.forEach(function (name) {
+        const button = document.createElement("button");
+        button.classList.add("who-option");
+        button.textContent = name;
+
+        button.addEventListener("click", function () {
+          if (name === question.answer) {
+            whoFeedback.style.color = "#4f7128";
+            whoFeedback.textContent = "✓ Správně!";
+
+            const allButtons =
+              whoOptions.querySelectorAll("button");
+
+            allButtons.forEach(function (btn) {
+              btn.disabled = true;
+            });
+
+            setTimeout(function () {
+              currentWho++;
+              showWhoQuestion();
+            }, 850);
+          } else {
+            whoFeedback.style.color = "#942e22";
+            whoFeedback.textContent = "✕ Zkus to ještě jednou.";
+          }
+        });
+
+        whoOptions.appendChild(button);
+      });
+    }
+  </script>
+</body>
+
+</html>
