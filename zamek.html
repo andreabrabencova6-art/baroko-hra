@@ -1,0 +1,1963 @@
+<!DOCTYPE html>
+<html lang="cs">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  >
+
+  <title>Baroko – Zámek</title>
+
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+
+      width: 100%;
+      height: 100%;
+
+      overflow: hidden;
+
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+      background: #1c120c;
+    }
+
+    button,
+    a {
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+
+    /* ==================================================
+       HLAVNÍ SCÉNA
+       ================================================== */
+
+    .scene {
+      position: relative;
+
+      width: 100%;
+      height: 100svh;
+
+      overflow: hidden;
+
+      background-image:
+        linear-gradient(
+          rgba(28, 15, 7, 0.10),
+          rgba(28, 15, 7, 0.23)
+        ),
+        url("images/zamek-pozadi.png");
+
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+
+    /* ==================================================
+       HLAVIČKA
+       ================================================== */
+
+    .top-bar {
+      position: absolute;
+
+      top: 10px;
+      left: 50%;
+
+      transform: translateX(-50%);
+
+      z-index: 60;
+
+      display: flex;
+      align-items: center;
+
+      gap: 30px;
+
+      padding:
+        8px
+        22px;
+
+      border:
+        1px solid
+        rgba(235, 205, 137, 0.6);
+
+      border-radius: 17px;
+
+      background:
+        rgba(55, 34, 18, 0.88);
+
+      color: #f5e1ad;
+
+      box-shadow:
+        0 5px 18px
+        rgba(0,0,0,0.45);
+    }
+
+
+    .location-title {
+      font-size:
+        clamp(
+          17px,
+          2vw,
+          23px
+        );
+
+      font-weight: bold;
+
+      letter-spacing: 4px;
+    }
+
+
+    .progress {
+      font-size:
+        clamp(
+          12px,
+          1.3vw,
+          15px
+        );
+
+      white-space: nowrap;
+    }
+
+
+    /* ==================================================
+       HRÁČ
+       ================================================== */
+
+    .player {
+      position: absolute;
+
+      left: 2%;
+      bottom: 0;
+
+      width: 22%;
+      height: 62%;
+
+      z-index: 15;
+
+      display: flex;
+
+      justify-content: center;
+      align-items: flex-end;
+
+      pointer-events: none;
+    }
+
+
+    .player img {
+      max-width: 100%;
+      max-height: 100%;
+
+      object-fit: contain;
+
+      filter:
+        drop-shadow(
+          0 12px 15px
+          rgba(0,0,0,0.5)
+        );
+    }
+
+
+    /* ==================================================
+       HOTSPOTY
+       ================================================== */
+
+    .hotspot {
+      position: absolute;
+
+      z-index: 35;
+
+      min-width: 105px;
+
+      padding:
+        10px
+        13px;
+
+      border:
+        3px solid
+        #e8c879;
+
+      border-radius: 14px;
+
+      background:
+        rgba(83, 50, 23, 0.9);
+
+      color: #fff0bf;
+
+      font-size:
+        clamp(
+          13px,
+          1.35vw,
+          16px
+        );
+
+      font-weight: bold;
+
+      text-align: center;
+
+      cursor: pointer;
+
+      touch-action: manipulation;
+
+      box-shadow:
+        0 7px 18px
+        rgba(0,0,0,0.38);
+
+      animation:
+        pulse
+        1.8s
+        infinite;
+    }
+
+
+    .hotspot-icon {
+      display: block;
+
+      margin-bottom: 3px;
+
+      font-size: 25px;
+    }
+
+
+    @keyframes pulse {
+
+      0% {
+        box-shadow:
+          0 0 0 0
+          rgba(236, 200, 116, 0.55);
+      }
+
+      70% {
+        box-shadow:
+          0 0 0 13px
+          rgba(236, 200, 116, 0);
+      }
+
+      100% {
+        box-shadow:
+          0 0 0 0
+          rgba(236, 200, 116, 0);
+      }
+
+    }
+
+
+    .hotspot.done {
+      background:
+        rgba(67, 96, 45, 0.93);
+
+      border-color:
+        #dcecb2;
+
+      animation: none;
+    }
+
+
+    .hotspot.done::after {
+      content: "✓";
+
+      position: absolute;
+
+      top: -9px;
+      right: -8px;
+
+      width: 25px;
+      height: 25px;
+
+      display: flex;
+
+      justify-content: center;
+      align-items: center;
+
+      border-radius: 50%;
+
+      background: #3f5e28;
+
+      color: white;
+
+      font-size: 15px;
+    }
+
+
+    /* ==================================================
+       POZICE MÍSTNOSTÍ
+       ================================================== */
+
+    .hotspot-kaple {
+      left: 30%;
+      top: 32%;
+    }
+
+    .hotspot-jidelna {
+      left: 48%;
+      top: 58%;
+    }
+
+    .hotspot-sal {
+      left: 67%;
+      top: 28%;
+    }
+
+    .hotspot-divadlo {
+      left: 80%;
+      top: 58%;
+    }
+
+
+    /* ==================================================
+       OVERLAY
+       ================================================== */
+
+    .overlay {
+      position: absolute;
+
+      inset: 0;
+
+      z-index: 80;
+
+      background:
+        rgba(13, 8, 4, 0.65);
+    }
+
+
+    /* ==================================================
+       PANELY
+       ================================================== */
+
+    .panel {
+      position: absolute;
+
+      left: 50%;
+      top: 50%;
+
+      transform:
+        translate(
+          -50%,
+          -50%
+        );
+
+      z-index: 100;
+
+      width:
+        min(
+          670px,
+          66vw
+        );
+
+      padding:
+        22px
+        30px;
+
+      border:
+        3px solid
+        #ab7b3b;
+
+      border-radius: 22px;
+
+      background:
+        linear-gradient(
+          145deg,
+          rgba(247,236,211,0.99),
+          rgba(214,187,139,0.99)
+        );
+
+      color: #422919;
+
+      text-align: center;
+
+      box-shadow:
+        0 22px 55px
+        rgba(0,0,0,0.68);
+    }
+
+
+    .panel h2 {
+      margin:
+        0
+        0
+        10px;
+
+      color: #66411f;
+
+      font-size:
+        clamp(
+          24px,
+          3vw,
+          34px
+        );
+    }
+
+
+    .panel p {
+      margin:
+        0
+        0
+        10px;
+
+      font-size:
+        clamp(
+          14px,
+          1.55vw,
+          18px
+        );
+
+      line-height: 1.42;
+    }
+
+
+    .panel-button {
+      margin-top: 10px;
+
+      padding:
+        10px
+        27px;
+
+      border:
+        2px solid
+        #efd18a;
+
+      border-radius: 11px;
+
+      background:
+        linear-gradient(
+          #b78038,
+          #754c1d
+        );
+
+      color: #fff4d0;
+
+      font-size: 16px;
+
+      font-weight: bold;
+
+      cursor: pointer;
+
+      touch-action: manipulation;
+    }
+
+
+    .panel-button:active {
+      transform: scale(0.96);
+    }
+
+
+    /* ==================================================
+       MÍSTNOST
+       ================================================== */
+
+    .room-panel {
+      width:
+        min(
+          920px,
+          87vw
+        );
+
+      padding: 15px;
+    }
+
+
+    .room-layout {
+      display: grid;
+
+      grid-template-columns:
+        53% 47%;
+
+      gap: 18px;
+
+      align-items: center;
+    }
+
+
+    .room-image {
+      width: 100%;
+      height: 350px;
+
+      overflow: hidden;
+
+      border:
+        3px solid
+        #9d7138;
+
+      border-radius: 15px;
+
+      background: #1f160f;
+
+      box-shadow:
+        inset 0 0 15px
+        rgba(0,0,0,0.4);
+    }
+
+
+    .room-image img {
+      width: 100%;
+      height: 100%;
+
+      object-fit: cover;
+    }
+
+
+    .room-info {
+      padding:
+        5px
+        15px
+        5px
+        4px;
+
+      text-align: left;
+    }
+
+
+    .room-info h2 {
+      text-align: center;
+    }
+
+
+    .room-info p {
+      font-size:
+        clamp(
+          13px,
+          1.45vw,
+          17px
+        );
+    }
+
+
+    .room-keyword {
+      display: block;
+
+      width: max-content;
+
+      max-width: 100%;
+
+      margin:
+        8px
+        auto
+        11px;
+
+      padding:
+        6px
+        13px;
+
+      border-radius: 9px;
+
+      background:
+        #79512b;
+
+      color: #fff0c7;
+
+      font-weight: bold;
+    }
+
+
+    /* ==================================================
+       ÚKOL
+       ================================================== */
+
+    .task-panel {
+      width:
+        min(
+          820px,
+          81vw
+        );
+    }
+
+
+    .task-label {
+      color: #916126;
+
+      font-size: 12px;
+
+      font-weight: bold;
+
+      letter-spacing: 3px;
+    }
+
+
+    .question {
+      margin:
+        11px
+        0
+        13px;
+
+      font-size:
+        clamp(
+          17px,
+          1.9vw,
+          21px
+        );
+
+      font-weight: bold;
+    }
+
+
+    .answers {
+      display: grid;
+
+      grid-template-columns:
+        repeat(
+          2,
+          1fr
+        );
+
+      gap: 11px;
+    }
+
+
+    .answer {
+      min-height: 72px;
+
+      padding: 11px;
+
+      border:
+        2px solid
+        #b88947;
+
+      border-radius: 12px;
+
+      background: #fff8e7;
+
+      color: #4b301c;
+
+      font-size: 14px;
+
+      font-weight: bold;
+
+      cursor: pointer;
+
+      touch-action: manipulation;
+    }
+
+
+    .answer.correct {
+      background: #dce9bd;
+
+      border-color: #64813d;
+
+      color: #3a5722;
+    }
+
+
+    .answer.wrong {
+      animation:
+        wrongFlash
+        0.5s ease;
+    }
+
+
+    @keyframes wrongFlash {
+
+      0%,
+      100% {
+        background: #fff8e7;
+      }
+
+      50% {
+        background: #efb7a9;
+
+        border-color: #a54330;
+      }
+
+    }
+
+
+    .feedback {
+      min-height: 25px;
+
+      margin-top: 10px;
+
+      font-weight: bold;
+    }
+
+
+    /* ==================================================
+       KONEC
+       ================================================== */
+
+    .finish-box {
+      position: absolute;
+
+      right: 4%;
+      bottom: 4%;
+
+      z-index: 60;
+
+      padding:
+        15px
+        18px;
+
+      border:
+        2px solid
+        #d7ae5e;
+
+      border-radius: 17px;
+
+      background:
+        rgba(53, 32, 16, 0.94);
+
+      color: #f4dfac;
+
+      text-align: center;
+
+      box-shadow:
+        0 10px 25px
+        rgba(0,0,0,0.46);
+
+      animation:
+        finishAppear
+        0.6s ease;
+    }
+
+
+    @keyframes finishAppear {
+
+      from {
+        opacity: 0;
+
+        transform:
+          translateY(15px);
+      }
+
+      to {
+        opacity: 1;
+
+        transform:
+          translateY(0);
+      }
+
+    }
+
+
+    .finish-box p {
+      margin:
+        0
+        0
+        9px;
+
+      font-size: 14px;
+    }
+
+
+    .next-button {
+      display: inline-block;
+
+      padding:
+        11px
+        24px;
+
+      border:
+        2px solid
+        #f1d28b;
+
+      border-radius: 11px;
+
+      background:
+        linear-gradient(
+          #ba8337,
+          #714617
+        );
+
+      color: #fff4ca;
+
+      text-decoration: none;
+
+      font-weight: bold;
+
+      font-size: 16px;
+
+      touch-action: manipulation;
+    }
+
+
+    /* ==================================================
+       TABLET
+       ================================================== */
+
+    @media
+      (orientation: landscape)
+      and
+      (max-height: 850px) {
+
+      .player {
+        height: 57%;
+      }
+
+      .panel {
+        padding:
+          16px
+          23px;
+      }
+
+      .room-panel {
+        padding: 12px;
+      }
+
+      .room-image {
+        height: 285px;
+      }
+
+      .answer {
+        min-height: 58px;
+
+        padding: 8px;
+
+        font-size: 13px;
+      }
+
+      .hotspot {
+        min-width: 92px;
+
+        padding:
+          7px
+          9px;
+      }
+
+      .hotspot-icon {
+        font-size: 21px;
+      }
+
+    }
+
+
+    /* ==================================================
+       PORTRÉT
+       ================================================== */
+
+    .rotate-warning {
+      display: none;
+    }
+
+
+    @media
+      (orientation: portrait) {
+
+      .rotate-warning {
+        position: fixed;
+
+        inset: 0;
+
+        z-index: 99999;
+
+        display: flex;
+
+        flex-direction: column;
+
+        justify-content: center;
+        align-items: center;
+
+        padding: 35px;
+
+        background: #2d1c10;
+
+        color: #f4e1b0;
+
+        text-align: center;
+      }
+
+
+      .rotate-icon {
+        font-size: 75px;
+      }
+
+
+      .rotate-warning h2 {
+        margin:
+          14px
+          0
+          7px;
+
+        font-size: 30px;
+      }
+
+
+      .rotate-warning p {
+        margin: 0;
+
+        font-size: 18px;
+      }
+
+    }
+
+  </style>
+
+</head>
+
+
+<body>
+
+
+  <!-- OTOČENÍ TABLETU -->
+
+  <div class="rotate-warning">
+
+    <div class="rotate-icon">
+      ↻
+    </div>
+
+    <h2>
+      Otoč tablet na šířku
+    </h2>
+
+    <p>
+      Tato hra je určena
+      pro tablet naležato.
+    </p>
+
+  </div>
+
+
+
+  <!-- ==================================================
+       SCÉNA
+       ================================================== -->
+
+  <main
+    class="scene"
+    id="scene"
+  >
+
+
+    <!-- HLAVIČKA -->
+
+    <div class="top-bar">
+
+      <div class="location-title">
+        ZÁMEK
+      </div>
+
+      <div
+        class="progress"
+        id="progress"
+      >
+        PROZKOUMÁNO 0 / 4
+      </div>
+
+    </div>
+
+
+
+    <!-- HRÁČ -->
+
+    <div class="player">
+
+      <img
+        id="playerImage"
+        src=""
+        alt="Tvoje postava"
+      >
+
+    </div>
+
+
+
+    <!-- ==================================================
+         MÍSTNOSTI
+         ================================================== -->
+
+    <button
+      class="
+        hotspot
+        hotspot-kaple
+      "
+      data-room="kaple"
+    >
+
+      <span class="hotspot-icon">
+        ⛪
+      </span>
+
+      KAPLE
+
+    </button>
+
+
+    <button
+      class="
+        hotspot
+        hotspot-jidelna
+      "
+      data-room="jidelna"
+    >
+
+      <span class="hotspot-icon">
+        🍽️
+      </span>
+
+      JÍDELNA
+
+    </button>
+
+
+    <button
+      class="
+        hotspot
+        hotspot-sal
+      "
+      data-room="sal"
+    >
+
+      <span class="hotspot-icon">
+        ✨
+      </span>
+
+      TANEČNÍ SÁL
+
+    </button>
+
+
+    <button
+      class="
+        hotspot
+        hotspot-divadlo
+      "
+      data-room="divadlo"
+    >
+
+      <span class="hotspot-icon">
+        🎭
+      </span>
+
+      DIVADLO
+
+    </button>
+
+
+
+    <!-- ==================================================
+         OVERLAY
+         ================================================== -->
+
+    <div
+      class="overlay"
+      id="overlay"
+    ></div>
+
+
+
+    <!-- ==================================================
+         ÚVOD
+         ================================================== -->
+
+    <section
+      class="panel"
+      id="introPanel"
+    >
+
+      <h2>
+        VÍTEJ NA ZÁMKU
+      </h2>
+
+      <p>
+        Nový oděv ti otevřel dveře
+        do světa šlechty.
+      </p>
+
+      <p>
+        Barokní šlechtická sídla
+        nesloužila pouze k bydlení.
+        Byla také místem reprezentace,
+        společenského života a zábavy.
+      </p>
+
+      <p>
+        Prozkoumej čtyři části zámku
+        a zjisti, jak mohl život
+        zdejší šlechty vypadat.
+      </p>
+
+      <button
+        class="panel-button"
+        id="startButton"
+      >
+        VSTOUPIT DO ZÁMKU
+      </button>
+
+    </section>
+
+
+
+    <!-- ==================================================
+         MÍSTNOST
+         ================================================== -->
+
+    <section
+      class="
+        panel
+        room-panel
+      "
+      id="roomPanel"
+      hidden
+    >
+
+      <div class="room-layout">
+
+
+        <div class="room-image">
+
+          <img
+            id="roomImage"
+            src=""
+            alt=""
+          >
+
+        </div>
+
+
+        <div class="room-info">
+
+          <h2 id="roomTitle"></h2>
+
+          <div id="roomText"></div>
+
+          <button
+            class="panel-button"
+            id="closeRoom"
+          >
+            POKRAČOVAT V PROHLÍDCE
+          </button>
+
+        </div>
+
+
+      </div>
+
+    </section>
+
+
+
+    <!-- ==================================================
+         ÚKOL
+         ================================================== -->
+
+    <section
+      class="
+        panel
+        task-panel
+      "
+      id="taskPanel"
+      hidden
+    >
+
+      <div class="task-label">
+        ZÁVĚREČNÝ ÚKOL
+      </div>
+
+      <h2>
+        ŽIVOT NA ZÁMKU
+      </h2>
+
+      <div
+        class="question"
+        id="questionText"
+      ></div>
+
+      <div
+        class="answers"
+        id="answers"
+      ></div>
+
+      <div
+        class="feedback"
+        id="feedback"
+      ></div>
+
+    </section>
+
+
+
+    <!-- ==================================================
+         KONEC
+         ================================================== -->
+
+    <div
+      class="finish-box"
+      id="finishBox"
+      hidden
+    >
+
+      <p>
+        Zámek máš prozkoumaný.
+      </p>
+
+      <a
+        href="krizovatka.html"
+        class="next-button"
+      >
+        POKRAČOVAT →
+      </a>
+
+    </div>
+
+
+  </main>
+
+
+
+  <script>
+
+    /* ==================================================
+       POSTAVA HRÁČE
+       ================================================== */
+
+    const playerImage =
+      document.getElementById(
+        "playerImage"
+      );
+
+
+    const selectedOutfit =
+      localStorage.getItem(
+        "obleceniObrazek"
+      );
+
+
+    if (selectedOutfit) {
+
+      playerImage.src =
+        selectedOutfit;
+
+    }
+
+    else {
+
+      const gender =
+        localStorage.getItem(
+          "pohlavi"
+        );
+
+
+      if (gender === "zena") {
+
+        playerImage.src =
+          "images/slechtic-zena-1.png";
+
+      }
+
+      else {
+
+        playerImage.src =
+          "images/slechtic-muz-1.png";
+
+      }
+
+    }
+
+
+
+    /* ==================================================
+       PRVKY
+       ================================================== */
+
+    const overlay =
+      document.getElementById(
+        "overlay"
+      );
+
+
+    const introPanel =
+      document.getElementById(
+        "introPanel"
+      );
+
+
+    const startButton =
+      document.getElementById(
+        "startButton"
+      );
+
+
+    const roomPanel =
+      document.getElementById(
+        "roomPanel"
+      );
+
+
+    const roomImage =
+      document.getElementById(
+        "roomImage"
+      );
+
+
+    const roomTitle =
+      document.getElementById(
+        "roomTitle"
+      );
+
+
+    const roomText =
+      document.getElementById(
+        "roomText"
+      );
+
+
+    const closeRoom =
+      document.getElementById(
+        "closeRoom"
+      );
+
+
+    const hotspots =
+      document.querySelectorAll(
+        ".hotspot"
+      );
+
+
+    const progress =
+      document.getElementById(
+        "progress"
+      );
+
+
+    const taskPanel =
+      document.getElementById(
+        "taskPanel"
+      );
+
+
+    const questionText =
+      document.getElementById(
+        "questionText"
+      );
+
+
+    const answers =
+      document.getElementById(
+        "answers"
+      );
+
+
+    const feedback =
+      document.getElementById(
+        "feedback"
+      );
+
+
+    const finishBox =
+      document.getElementById(
+        "finishBox"
+      );
+
+
+
+    /* ==================================================
+       ÚVOD
+       ================================================== */
+
+    startButton.addEventListener(
+      "click",
+      function () {
+
+        introPanel.hidden =
+          true;
+
+        overlay.hidden =
+          true;
+
+      }
+    );
+
+
+
+    /* ==================================================
+       DATA MÍSTNOSTÍ
+       ================================================== */
+
+    const rooms = {
+
+      kaple: {
+
+        title:
+          "ZÁMECKÁ KAPLE",
+
+        image:
+          "images/zamek-kaple.png",
+
+        text:
+          `
+            <span class="room-keyword">
+              VÍRA
+            </span>
+
+            <p>
+              Kaple byla místem
+              náboženských obřadů
+              a soukromé zbožnosti.
+            </p>
+
+            <p>
+              V baroku hrálo náboženství
+              ve společnosti velmi významnou roli
+              a promítalo se také
+              do podoby šlechtických sídel.
+            </p>
+          `
+
+      },
+
+
+      jidelna: {
+
+        title:
+          "JÍDELNA",
+
+        image:
+          "images/zamek-jidelna.png",
+
+        text:
+          `
+            <span class="room-keyword">
+              HOSTINY
+            </span>
+
+            <p>
+              Stolování mohlo být
+              důležitou součástí
+              společenského života.
+            </p>
+
+            <p>
+              Bohatší domácnosti používaly
+              kvalitní nádobí,
+              sklo a další luxusní předměty.
+            </p>
+          `
+
+      },
+
+
+      sal: {
+
+        title:
+          "TANEČNÍ SÁL",
+
+        image:
+          "images/zamek-sal.png",
+
+        text:
+          `
+            <span class="room-keyword">
+              REPREZENTACE
+            </span>
+
+            <p>
+              Velké sály sloužily
+              k přijímání hostů,
+              slavnostem a společenským událostem.
+            </p>
+
+            <p>
+              Výzdoba měla návštěvníkům
+              připomínat bohatství
+              a význam majitele sídla.
+            </p>
+          `
+
+      },
+
+
+      divadlo: {
+
+        title:
+          "ZÁMECKÉ DIVADLO",
+
+        image:
+          "images/zamek-divadlo.png",
+
+        text:
+          `
+            <span class="room-keyword">
+              ZÁBAVA
+            </span>
+
+            <p>
+              Některá šlechtická sídla
+              měla vlastní divadelní prostory.
+            </p>
+
+            <p>
+              Divadlo, hudba a slavnosti
+              patřily k významným formám
+              dvorské a šlechtické zábavy.
+            </p>
+          `
+
+      }
+
+    };
+
+
+
+    /* ==================================================
+       NÁVŠTĚVY
+       ================================================== */
+
+    const visited =
+      new Set();
+
+
+    let currentHotspot =
+      null;
+
+
+    hotspots.forEach(
+      function (hotspot) {
+
+        hotspot.addEventListener(
+          "click",
+          function () {
+
+            const key =
+              hotspot.dataset.room;
+
+
+            const room =
+              rooms[key];
+
+
+            currentHotspot =
+              hotspot;
+
+
+            roomTitle.textContent =
+              room.title;
+
+
+            roomImage.src =
+              room.image;
+
+
+            roomImage.alt =
+              room.title;
+
+
+            roomText.innerHTML =
+              room.text;
+
+
+            visited.add(
+              key
+            );
+
+
+            hotspot.classList.add(
+              "done"
+            );
+
+
+            progress.textContent =
+              "PROZKOUMÁNO "
+              +
+              visited.size
+              +
+              " / 4";
+
+
+            overlay.hidden =
+              false;
+
+
+            roomPanel.hidden =
+              false;
+
+          }
+        );
+
+      }
+    );
+
+
+
+    closeRoom.addEventListener(
+      "click",
+      function () {
+
+        roomPanel.hidden =
+          true;
+
+
+        overlay.hidden =
+          true;
+
+
+        if (
+          visited.size === 4
+        ) {
+
+          setTimeout(
+            startTask,
+            400
+          );
+
+        }
+
+      }
+    );
+
+
+
+    /* ==================================================
+       ZÁVĚREČNÝ ÚKOL
+       ================================================== */
+
+    const questions = [
+
+      {
+        question:
+          "Která místnost souvisela s náboženským životem?",
+
+        answers: [
+
+          {
+            text:
+              "Zámecká kaple",
+
+            correct:
+              true
+          },
+
+          {
+            text:
+              "Taneční sál",
+
+            correct:
+              false
+          },
+
+          {
+            text:
+              "Jídelna",
+
+            correct:
+              false
+          },
+
+          {
+            text:
+              "Zámecké divadlo",
+
+            correct:
+              false
+          }
+
+        ]
+
+      },
+
+
+      {
+        question:
+          "K čemu mohl sloužit velký reprezentační sál?",
+
+        answers: [
+
+          {
+            text:
+              "K přijímání hostů a slavnostem",
+
+            correct:
+              true
+          },
+
+          {
+            text:
+              "K věznění provinilců",
+
+            correct:
+              false
+          },
+
+          {
+            text:
+              "Pouze ke skladování potravin",
+
+            correct:
+              false
+          },
+
+          {
+            text:
+              "Jako městská šatlava",
+
+            correct:
+              false
+          }
+
+        ]
+
+      },
+
+
+      {
+        question:
+          "Co mohlo patřit k zábavě šlechty?",
+
+        answers: [
+
+          {
+            text:
+              "Divadlo a hudba",
+
+            correct:
+              true
+          },
+
+          {
+            text:
+              "Každodenní robotní práce",
+
+            correct:
+              false
+          },
+
+          {
+            text:
+              "Práce na městských hradbách",
+
+            correct:
+              false
+          },
+
+          {
+            text:
+              "Povinné obdělávání panského pole",
+
+            correct:
+              false
+          }
+
+        ]
+
+      }
+
+    ];
+
+
+    let currentQuestion =
+      0;
+
+
+    let taskStarted =
+      false;
+
+
+
+    function startTask() {
+
+      if (taskStarted) {
+        return;
+      }
+
+
+      taskStarted =
+        true;
+
+
+      overlay.hidden =
+        false;
+
+
+      taskPanel.hidden =
+        false;
+
+
+      showQuestion();
+
+    }
+
+
+
+    function showQuestion() {
+
+      const data =
+        questions[
+          currentQuestion
+        ];
+
+
+      questionText.textContent =
+        data.question;
+
+
+      answers.innerHTML =
+        "";
+
+
+      feedback.textContent =
+        "";
+
+
+      data.answers.forEach(
+        function (answer) {
+
+          const button =
+            document.createElement(
+              "button"
+            );
+
+
+          button.className =
+            "answer";
+
+
+          button.textContent =
+            answer.text;
+
+
+          button.addEventListener(
+            "click",
+            function () {
+
+              if (
+                answer.correct
+              ) {
+
+                button.classList.add(
+                  "correct"
+                );
+
+
+                feedback.style.color =
+                  "#56742f";
+
+
+                feedback.textContent =
+                  "✓ Správně!";
+
+
+                Array.from(
+                  answers.children
+                )
+                .forEach(
+                  function (item) {
+
+                    item.disabled =
+                      true;
+
+                  }
+                );
+
+
+                setTimeout(
+                  function () {
+
+                    currentQuestion++;
+
+
+                    if (
+                      currentQuestion
+                      <
+                      questions.length
+                    ) {
+
+                      showQuestion();
+
+                    }
+
+                    else {
+
+                      finishCastle();
+
+                    }
+
+                  },
+                  800
+                );
+
+              }
+
+              else {
+
+                button.classList.remove(
+                  "wrong"
+                );
+
+
+                void button.offsetWidth;
+
+
+                button.classList.add(
+                  "wrong"
+                );
+
+
+                feedback.style.color =
+                  "#963926";
+
+
+                feedback.textContent =
+                  "✕ Zkus to ještě jednou.";
+
+              }
+
+            }
+          );
+
+
+          answers.appendChild(
+            button
+          );
+
+        }
+      );
+
+    }
+
+
+
+    /* ==================================================
+       HOTOVO
+       ================================================== */
+
+    function finishCastle() {
+
+      taskPanel.hidden =
+        true;
+
+
+      overlay.hidden =
+        true;
+
+
+      localStorage.setItem(
+        "zamekHotovo",
+        "true"
+      );
+
+
+      setTimeout(
+        function () {
+
+          finishBox.hidden =
+            false;
+
+        },
+        400
+      );
+
+    }
+
+  </script>
+
+
+</body>
+
+</html>

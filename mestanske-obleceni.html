@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="cs">
+
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  >
+
+  <title>Baroko – Nové oblečení</title>
+
+  <style>
+
+    /* ==================================================
+       ZÁKLAD
+       ================================================== */
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+
+      width: 100%;
+      height: 100%;
+
+      overflow: hidden;
+
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+      background: #2d2015;
+    }
+
+    button,
+    a {
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+
+    /* ==================================================
+       HLAVNÍ SCÉNA
+       ================================================== */
+
+    .scene {
+      position: relative;
+
+      width: 100%;
+      height: 100svh;
+
+      overflow: hidden;
+
+      background-image:
+        linear-gradient(
+          rgba(36, 23, 12, 0.2),
+          rgba(36, 23, 12, 0.42)
+        ),
+        url("images/mesto-vstup-pozadi.png");
+
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+
+    .scene::after {
+      content: "";
+
+      position: absolute;
+
+      inset: 0;
+
+      z-index: 1;
+
+      pointer-events: none;
+
+      background:
+        radial-gradient(
+          circle at center,
+          transparent 40%,
+          rgba(22, 12, 5, 0.35) 100%
+        );
+    }
+
+
+    /* ==================================================
+       NADPIS
+       ================================================== */
+
+    .header {
+      position: absolute;
+
+      top: 3%;
+      left: 50%;
+
+      transform:
+        translateX(-50%);
+
+      z-index: 20;
+
+      width: 90%;
+
+      text-align: center;
+
+      color: #fff1c6;
+
+      text-shadow:
+        0 4px 10px
+        rgba(0, 0, 0, 0.9);
+    }
+
+    .header h1 {
+      margin:
+        0
+        0
+        5px;
+
+      font-size:
+        clamp(
+          27px,
+          3.5vw,
+          45px
+        );
+
+      letter-spacing: 3px;
+    }
+
+    .header p {
+      margin: 0;
+
+      font-size:
+        clamp(
+          14px,
+          1.6vw,
+          19px
+        );
+    }
+
+
+    /* ==================================================
+       HLAVNÍ PANEL
+       ================================================== */
+
+    .selection-panel {
+      position: absolute;
+
+      left: 50%;
+      bottom: 3%;
+
+      transform:
+        translateX(-50%);
+
+      z-index: 10;
+
+      width: 88%;
+      height: 78%;
+
+      display: flex;
+
+      flex-direction: column;
+
+      align-items: center;
+
+      padding:
+        18px
+        28px;
+
+      border:
+        3px solid
+        rgba(203, 159, 81, 0.92);
+
+      border-radius: 28px;
+
+      background:
+        linear-gradient(
+          145deg,
+          rgba(54, 34, 18, 0.87),
+          rgba(27, 17, 9, 0.92)
+        );
+
+      box-shadow:
+        0 18px 50px
+        rgba(0, 0, 0, 0.5);
+    }
+
+
+    /* ==================================================
+       ÚVODNÍ TEXT
+       ================================================== */
+
+    .story-text {
+      flex: 0 0 auto;
+
+      margin-bottom: 10px;
+
+      color: #ecd9aa;
+
+      font-size:
+        clamp(
+          13px,
+          1.45vw,
+          17px
+        );
+
+      line-height: 1.35;
+
+      text-align: center;
+    }
+
+    .story-text strong {
+      color: #ffe6a3;
+    }
+
+
+    /* ==================================================
+       ODĚVY
+       ================================================== */
+
+    .outfits {
+      flex: 1;
+
+      width: 100%;
+
+      display: flex;
+
+      justify-content: center;
+      align-items: flex-end;
+
+      gap:
+        clamp(
+          30px,
+          6vw,
+          90px
+        );
+
+      min-height: 0;
+    }
+
+
+    .outfit {
+      position: relative;
+
+      width:
+        min(
+          25%,
+          260px
+        );
+
+      height: 100%;
+
+      padding: 0;
+
+      border: none;
+
+      background: transparent;
+
+      display: flex;
+
+      flex-direction: column;
+
+      justify-content: flex-end;
+      align-items: center;
+
+      cursor: pointer;
+
+      touch-action: manipulation;
+
+      -webkit-tap-highlight-color:
+        transparent;
+    }
+
+
+    .outfit-image {
+      position: relative;
+
+      width: 100%;
+      height: calc(100% - 45px);
+
+      display: flex;
+
+      justify-content: center;
+      align-items: flex-end;
+
+      transition:
+        transform 0.25s ease,
+        filter 0.25s ease;
+    }
+
+
+    .outfit-image::before {
+      content: "";
+
+      position: absolute;
+
+      left: 50%;
+      bottom: 3%;
+
+      transform:
+        translateX(-50%);
+
+      width: 110%;
+      height: 78%;
+
+      z-index: -1;
+
+      opacity: 0;
+
+      border-radius: 50%;
+
+      background:
+        radial-gradient(
+          ellipse,
+          rgba(255, 218, 120, 0.5),
+          rgba(255, 218, 120, 0) 70%
+        );
+
+      transition:
+        opacity 0.25s ease;
+    }
+
+
+    .outfit img {
+      max-width: 100%;
+      max-height: 100%;
+
+      object-fit: contain;
+
+      pointer-events: none;
+
+      user-select: none;
+
+      -webkit-user-drag: none;
+
+      filter:
+        drop-shadow(
+          0 12px 12px
+          rgba(0, 0, 0, 0.55)
+        );
+    }
+
+
+    /* ==================================================
+       POPISEK
+       ================================================== */
+
+    .outfit-label {
+      flex: 0 0 40px;
+
+      min-width: 145px;
+
+      margin-top: 4px;
+
+      padding:
+        8px
+        18px;
+
+      border:
+        2px solid
+        #b9853e;
+
+      border-radius: 12px;
+
+      background:
+        rgba(76, 47, 22, 0.9);
+
+      color: #f5dfaa;
+
+      font-size:
+        clamp(
+          12px,
+          1.3vw,
+          15px
+        );
+
+      font-weight: bold;
+
+      text-align: center;
+
+      transition:
+        background 0.25s ease,
+        border-color 0.25s ease;
+    }
+
+
+    /* ==================================================
+       VÝBĚR
+       ================================================== */
+
+    .outfit.selected
+    .outfit-image {
+      transform:
+        translateY(-8px)
+        scale(1.04);
+    }
+
+    .outfit.selected
+    .outfit-image::before {
+      opacity: 1;
+    }
+
+    .outfit.selected
+    .outfit-label {
+      border-color: #f4d37f;
+
+      background:
+        #8a622c;
+
+      color: #fff5ce;
+    }
+
+
+    .outfit.selected
+    .outfit-label::after {
+      content: " ✓";
+    }
+
+
+    .outfit:active
+    .outfit-image {
+      transform:
+        scale(0.97);
+    }
+
+
+    /* ==================================================
+       DALŠÍ
+       ================================================== */
+
+    .next-wrap {
+      position: absolute;
+
+      right: 4%;
+      bottom: 4%;
+
+      z-index: 30;
+
+      text-align: center;
+    }
+
+
+    .next-button {
+      display: inline-block;
+
+      padding:
+        13px
+        30px;
+
+      border:
+        3px solid
+        #f0d28b;
+
+      border-radius: 15px;
+
+      background:
+        linear-gradient(
+          145deg,
+          #be8a3c,
+          #704718
+        );
+
+      color: #fff5d1;
+
+      text-decoration: none;
+
+      font-size:
+        clamp(
+          15px,
+          1.7vw,
+          19px
+        );
+
+      font-weight: bold;
+
+      box-shadow:
+        0 9px 22px
+        rgba(0, 0, 0, 0.48);
+
+      animation:
+        nextAppear
+        0.55s ease;
+
+      touch-action: manipulation;
+    }
+
+
+    .next-button:active {
+      transform: scale(0.96);
+    }
+
+
+    @keyframes nextAppear {
+
+      from {
+        opacity: 0;
+
+        transform:
+          translateY(15px);
+      }
+
+      to {
+        opacity: 1;
+
+        transform:
+          translateY(0);
+      }
+
+    }
+
+
+    /* ==================================================
+       POTVRZENÍ VÝBĚRU
+       ================================================== */
+
+    .selection-message {
+      position: absolute;
+
+      left: 4%;
+      bottom: 4%;
+
+      z-index: 30;
+
+      padding:
+        9px
+        16px;
+
+      border-radius: 13px;
+
+      background:
+        rgba(45, 28, 13, 0.86);
+
+      color: #f0dba7;
+
+      font-size:
+        clamp(
+          12px,
+          1.3vw,
+          15px
+        );
+
+      opacity: 0;
+
+      transition:
+        opacity 0.3s ease;
+    }
+
+
+    .selection-message.visible {
+      opacity: 1;
+    }
+
+
+    /* ==================================================
+       TABLET NALEŽATO
+       ================================================== */
+
+    @media
+      (orientation: landscape)
+      and
+      (max-height: 850px) {
+
+      .header {
+        top: 1.5%;
+      }
+
+      .header h1 {
+        margin-bottom: 2px;
+      }
+
+      .selection-panel {
+        height: 79%;
+
+        padding:
+          12px
+          22px;
+      }
+
+      .story-text {
+        margin-bottom: 5px;
+      }
+
+      .outfit-label {
+        padding:
+          6px
+          15px;
+
+        flex-basis: 34px;
+      }
+
+      .outfit-image {
+        height:
+          calc(
+            100% - 38px
+          );
+      }
+
+    }
+
+
+    /* ==================================================
+       TABLET NA VÝŠKU
+       ================================================== */
+
+    .rotate-warning {
+      display: none;
+    }
+
+
+    @media
+      (orientation: portrait) {
+
+      .rotate-warning {
+        position: fixed;
+
+        inset: 0;
+
+        z-index: 99999;
+
+        display: flex;
+
+        flex-direction: column;
+
+        justify-content: center;
+        align-items: center;
+
+        padding: 35px;
+
+        background:
+          linear-gradient(
+            145deg,
+            #2a180d,
+            #57351d
+          );
+
+        color: #f5e2b3;
+
+        text-align: center;
+      }
+
+      .rotate-symbol {
+        font-size: 75px;
+      }
+
+      .rotate-warning h2 {
+        margin:
+          15px
+          0
+          8px;
+
+        font-size: 30px;
+      }
+
+      .rotate-warning p {
+        margin: 0;
+
+        font-size: 18px;
+
+        line-height: 1.4;
+      }
+
+    }
+
+  </style>
+</head>
+
+
+<body>
+
+
+  <!-- ==================================================
+       OTOČENÍ TABLETU
+       ================================================== -->
+
+  <div class="rotate-warning">
+
+    <div class="rotate-symbol">
+      ↻
+    </div>
+
+    <h2>
+      Otoč tablet na šířku
+    </h2>
+
+    <p>
+      Tato hra je připravena
+      pro hraní na tabletu naležato.
+    </p>
+
+  </div>
+
+
+
+  <!-- ==================================================
+       SCÉNA
+       ================================================== -->
+
+  <main
+    class="scene"
+    id="scene"
+  >
+
+
+    <!-- ==================================================
+         NADPIS
+         ================================================== -->
+
+    <header class="header">
+
+      <h1>
+        NOVÝ ŽIVOT VE MĚSTĚ
+      </h1>
+
+      <p>
+        Vyber si oblečení,
+        ve kterém budeš pokračovat dál.
+      </p>
+
+    </header>
+
+
+
+    <!-- ==================================================
+         VÝBĚR ODĚVU
+         ================================================== -->
+
+    <section class="selection-panel">
+
+      <div class="story-text">
+
+        Cesta z venkova tě zavedla
+        až k městu.
+
+        <strong>
+          Chceš-li mezi měšťany splynout,
+          vyber si nový oděv.
+        </strong>
+
+      </div>
+
+
+      <div
+        class="outfits"
+        id="outfits"
+      ></div>
+
+    </section>
+
+
+
+    <!-- ==================================================
+         INFORMACE O VÝBĚRU
+         ================================================== -->
+
+    <div
+      class="selection-message"
+      id="selectionMessage"
+    >
+      Oděv vybrán.
+    </div>
+
+
+
+    <!-- ==================================================
+         POKRAČOVAT
+         ================================================== -->
+
+    <div
+      class="next-wrap"
+      id="nextWrap"
+      hidden
+    >
+
+      <a
+        href="satlava.html"
+        class="next-button"
+      >
+        VSTOUPIT DO MĚSTA →
+      </a>
+
+    </div>
+
+
+  </main>
+
+
+
+  <script>
+
+    /* ==================================================
+       POHLAVÍ
+       ================================================== */
+
+    const gender =
+      localStorage.getItem(
+        "pohlavi"
+      );
+
+
+    const outfits =
+      document.getElementById(
+        "outfits"
+      );
+
+
+    const nextWrap =
+      document.getElementById(
+        "nextWrap"
+      );
+
+
+    const selectionMessage =
+      document.getElementById(
+        "selectionMessage"
+      );
+
+
+
+    /* ==================================================
+       OBRÁZKY ODĚVŮ
+       ================================================== */
+
+    const maleOutfits = [
+
+      {
+        image:
+          "images/mestan-muz-1.png",
+
+        label:
+          "ODĚV I"
+      },
+
+      {
+        image:
+          "images/mestan-muz-2.png",
+
+        label:
+          "ODĚV II"
+      },
+
+      {
+        image:
+          "images/mestan-muz-3.png",
+
+        label:
+          "ODĚV III"
+      }
+
+    ];
+
+
+    const femaleOutfits = [
+
+      {
+        image:
+          "images/mestanka-zena-1.png",
+
+        label:
+          "ODĚV I"
+      },
+
+      {
+        image:
+          "images/mestanka-zena-2.png",
+
+        label:
+          "ODĚV II"
+      },
+
+      {
+        image:
+          "images/mestanka-zena-3.png",
+
+        label:
+          "ODĚV III"
+      }
+
+    ];
+
+
+
+    /* ==================================================
+       VÝBĚR SPRÁVNÉ SADY
+       ================================================== */
+
+    let availableOutfits;
+
+
+    if (
+      gender === "zena"
+    ) {
+
+      availableOutfits =
+        femaleOutfits;
+
+    }
+
+    else {
+
+      availableOutfits =
+        maleOutfits;
+
+    }
+
+
+
+    /* ==================================================
+       VYTVOŘENÍ TŘÍ POSTAV
+       ================================================== */
+
+    availableOutfits.forEach(
+      function (
+        outfit,
+        index
+      ) {
+
+        const button =
+          document.createElement(
+            "button"
+          );
+
+
+        button.className =
+          "outfit";
+
+
+        button.innerHTML =
+          `
+            <div class="outfit-image">
+
+              <img
+                src="${outfit.image}"
+                alt="${outfit.label}"
+              >
+
+            </div>
+
+            <div class="outfit-label">
+              ${outfit.label}
+            </div>
+          `;
+
+
+
+        /* ===============================================
+           KLIKNUTÍ NA ODĚV
+           =============================================== */
+
+        button.addEventListener(
+          "click",
+          function () {
+
+            document
+              .querySelectorAll(
+                ".outfit"
+              )
+              .forEach(
+                function (
+                  other
+                ) {
+
+                  other
+                    .classList
+                    .remove(
+                      "selected"
+                    );
+
+                }
+              );
+
+
+            button
+              .classList
+              .add(
+                "selected"
+              );
+
+
+
+            /* ===========================================
+               ULOŽENÍ
+               =========================================== */
+
+            localStorage.setItem(
+              "obleceniObrazek",
+              outfit.image
+            );
+
+
+            localStorage.setItem(
+              "mestanskeObleceni",
+              outfit.image
+            );
+
+
+            localStorage.setItem(
+              "spolecenskePostaveni",
+              "mestan"
+            );
+
+
+            localStorage.setItem(
+              "obleceni",
+              "mestanske-"
+              +
+              (
+                index + 1
+              )
+            );
+
+
+
+            /* ===========================================
+               ZPRÁVA
+               =========================================== */
+
+            selectionMessage
+              .classList
+              .add(
+                "visible"
+              );
+
+
+            selectionMessage
+              .textContent =
+                gender === "zena"
+                  ? "Měšťanský oděv vybrán."
+                  : "Měšťanský oděv vybrán.";
+
+
+
+            /* ===========================================
+               TLAČÍTKO DÁLE
+               =========================================== */
+
+            nextWrap.hidden =
+              false;
+
+          }
+        );
+
+
+        outfits.appendChild(
+          button
+        );
+
+      }
+    );
+
+  </script>
+
+</body>
+
+</html>

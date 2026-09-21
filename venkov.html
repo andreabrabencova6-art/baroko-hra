@@ -1,0 +1,2326 @@
+<!DOCTYPE html>
+<html lang="cs">
+
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  >
+
+  <title>Baroko – Venkov</title>
+
+  <style>
+
+    /* ==================================================
+       ZÁKLAD
+       ================================================== */
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+      background: #2d2115;
+    }
+
+    button {
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+
+    /* ==================================================
+       HLAVNÍ SCÉNA
+       ================================================== */
+
+    .scene {
+      position: relative;
+
+      width: 100%;
+      height: 100svh;
+
+      overflow: hidden;
+
+      background-image:
+        linear-gradient(
+          rgba(31, 21, 10, 0.08),
+          rgba(31, 21, 10, 0.16)
+        ),
+        url("images/venkov-pozadi.png");
+
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+
+    /* ==================================================
+       HLAVIČKA
+       ================================================== */
+
+    .top-bar {
+      position: absolute;
+
+      top: 12px;
+      left: 50%;
+
+      transform: translateX(-50%);
+
+      z-index: 40;
+
+      display: flex;
+      align-items: center;
+
+      gap: 35px;
+
+      padding:
+        9px
+        22px;
+
+      background:
+        rgba(55, 34, 18, 0.82);
+
+      border:
+        1px solid
+        rgba(238, 204, 132, 0.6);
+
+      border-radius: 18px;
+
+      color: #f6e4b6;
+
+      box-shadow:
+        0 5px 18px
+        rgba(0, 0, 0, 0.35);
+    }
+
+    .top-title {
+      font-size:
+        clamp(
+          16px,
+          2vw,
+          24px
+        );
+
+      font-weight: bold;
+
+      letter-spacing: 4px;
+    }
+
+    .progress {
+      font-size:
+        clamp(
+          12px,
+          1.3vw,
+          16px
+        );
+
+      white-space: nowrap;
+    }
+
+
+    /* ==================================================
+       POSTAVA
+       ================================================== */
+
+    .player {
+  position: absolute;
+
+  left: 3%;
+  bottom: 0;
+
+  width: 34%;
+  height: 72%;
+
+  z-index: 8;
+
+  display: flex;
+
+  align-items: flex-end;
+  justify-content: center;
+
+  pointer-events: none;
+}
+
+    .player img {
+  max-width: 100%;
+  max-height: 100%;
+
+  object-fit: contain;
+
+  filter:
+    drop-shadow(
+      0 10px 13px
+      rgba(0, 0, 0, 0.45)
+    );
+}
+
+
+    /* ==================================================
+       INTERAKTIVNÍ BODY
+       ================================================== */
+
+    .hotspot {
+      position: absolute;
+
+      width: 58px;
+      height: 58px;
+
+      z-index: 15;
+
+      border:
+        3px solid
+        #f5d88d;
+
+      border-radius: 50%;
+
+      background:
+        rgba(116, 78, 30, 0.78);
+
+      color: #fff4ce;
+
+      font-size: 25px;
+
+      display: flex;
+
+      justify-content: center;
+      align-items: center;
+
+      cursor: pointer;
+
+      box-shadow:
+        0 0 0
+        rgba(255, 220, 120, 0.65);
+
+      animation:
+        pulse 1.8s infinite;
+
+      touch-action: manipulation;
+    }
+
+    @keyframes pulse {
+
+      0% {
+        box-shadow:
+          0 0 0 0
+          rgba(255, 220, 120, 0.6);
+      }
+
+      70% {
+        box-shadow:
+          0 0 0 15px
+          rgba(255, 220, 120, 0);
+      }
+
+      100% {
+        box-shadow:
+          0 0 0 0
+          rgba(255, 220, 120, 0);
+      }
+
+    }
+
+    .hotspot.done {
+      background: #627a35;
+
+      border-color: #e5efad;
+
+      animation: none;
+    }
+
+    .hotspot.done::after {
+      content: "✓";
+
+      position: absolute;
+
+      right: -6px;
+      top: -8px;
+
+      width: 23px;
+      height: 23px;
+
+      display: flex;
+
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 50%;
+
+      background: #496225;
+
+      color: white;
+
+      font-size: 14px;
+    }
+
+
+    /* POZICE BODŮ */
+
+    .hotspot-house {
+      left: 29%;
+      top: 31%;
+    }
+
+    .hotspot-field {
+      left: 53%;
+      top: 54%;
+    }
+
+    .hotspot-barn {
+      left: 72%;
+      top: 36%;
+    }
+
+    .hotspot-road {
+      left: 83%;
+      top: 59%;
+    }
+
+
+    /* ==================================================
+       INFORMAČNÍ PANEL
+       ================================================== */
+
+    .info-panel {
+      position: absolute;
+
+      left: 50%;
+      top: 50%;
+
+      transform:
+        translate(
+          -50%,
+          -50%
+        );
+
+      width:
+        min(
+          560px,
+          55vw
+        );
+
+      z-index: 90;
+
+      padding:
+        24px
+        30px;
+
+      background:
+        linear-gradient(
+          145deg,
+          rgba(249, 239, 214, 0.98),
+          rgba(223, 197, 149, 0.98)
+        );
+
+      border:
+        3px solid
+        #a97834;
+
+      border-radius: 24px;
+
+      box-shadow:
+        0 22px 55px
+        rgba(0, 0, 0, 0.55);
+
+      text-align: center;
+
+      color: #482b1b;
+    }
+
+    .info-panel h2 {
+      margin:
+        0
+        0
+        12px;
+
+      color: #684123;
+
+      font-size:
+        clamp(
+          24px,
+          3vw,
+          34px
+        );
+    }
+
+    .info-panel p {
+      margin:
+        0
+        0
+        12px;
+
+      font-size:
+        clamp(
+          15px,
+          1.7vw,
+          19px
+        );
+
+      line-height: 1.45;
+    }
+
+    .info-keyword {
+      display: inline-block;
+
+      margin:
+        7px
+        0;
+
+      padding:
+        7px
+        13px;
+
+      border-radius: 10px;
+
+      background:
+        #8b6030;
+
+      color: #fff1ca;
+
+      font-weight: bold;
+    }
+
+    .panel-button {
+      margin-top: 12px;
+
+      padding:
+        11px
+        28px;
+
+      border:
+        2px solid
+        #f1d493;
+
+      border-radius: 12px;
+
+      background:
+        linear-gradient(
+          #b9843b,
+          #79501f
+        );
+
+      color: white;
+
+      font-size: 17px;
+
+      font-weight: bold;
+
+      cursor: pointer;
+
+      touch-action: manipulation;
+    }
+
+    .panel-button:active {
+      transform: scale(0.96);
+    }
+
+
+    /* ==================================================
+       SVITKY
+       ================================================== */
+
+    .scroll-area {
+      position: absolute;
+
+      right: 2.5%;
+      top: 14%;
+
+      z-index: 20;
+
+      display: flex;
+
+      flex-direction: column;
+
+      gap: 10px;
+    }
+
+    .scroll-title {
+      margin-bottom: 2px;
+
+      color: #fff0be;
+
+      font-size: 13px;
+
+      text-align: center;
+
+      text-shadow:
+        0 2px 6px
+        rgba(0, 0, 0, 0.8);
+    }
+
+    .scroll-button {
+      position: relative;
+
+      width: 150px;
+      height: 52px;
+
+      border:
+        2px solid
+        #ae7d3e;
+
+      border-radius: 17px;
+
+      background:
+        linear-gradient(
+          145deg,
+          #f4e0b3,
+          #d6b77b
+        );
+
+      color: #563417;
+
+      font-size: 16px;
+
+      font-weight: bold;
+
+      cursor: pointer;
+
+      box-shadow:
+        0 7px 15px
+        rgba(0, 0, 0, 0.3);
+
+      touch-action: manipulation;
+    }
+
+    .scroll-button::before,
+    .scroll-button::after {
+      content: "";
+
+      position: absolute;
+
+      top: 7px;
+
+      width: 10px;
+      height: 35px;
+
+      border-radius: 8px;
+
+      background:
+        linear-gradient(
+          #c69b56,
+          #8f612a
+        );
+    }
+
+    .scroll-button::before {
+      left: -7px;
+    }
+
+    .scroll-button::after {
+      right: -7px;
+    }
+
+    .scroll-button.done {
+      background:
+        linear-gradient(
+          #e2c45e,
+          #bc8c29
+        );
+
+      color: #412709;
+    }
+
+
+    /* ==================================================
+       OTÁZKA ZE SVITKU
+       ================================================== */
+
+    .question-options {
+      display: grid;
+
+      grid-template-columns:
+        1fr;
+
+      gap: 8px;
+
+      margin-top: 14px;
+    }
+
+    .answer-button {
+      padding:
+        10px
+        12px;
+
+      border:
+        2px solid
+        #c2944a;
+
+      border-radius: 10px;
+
+      background: #fff8e9;
+
+      color: #4f301b;
+
+      font-size: 15px;
+
+      cursor: pointer;
+
+      touch-action: manipulation;
+    }
+
+    .answer-button:active {
+      transform: scale(0.98);
+    }
+
+    .question-feedback {
+      min-height: 24px;
+
+      margin-top: 8px;
+
+      font-weight: bold;
+    }
+
+
+    /* ==================================================
+       ZÁVORA
+       ================================================== */
+
+    .barrier-area {
+      position: absolute;
+
+      right: 3%;
+      bottom: 9%;
+
+      width: 290px;
+      height: 165px;
+
+      z-index: 12;
+
+      pointer-events: none;
+    }
+
+    .barrier-post {
+      position: absolute;
+
+      left: 20px;
+      bottom: 0;
+
+      width: 34px;
+      height: 120px;
+
+      border:
+        3px solid
+        #523317;
+
+      border-radius: 5px;
+
+      background:
+        linear-gradient(
+          90deg,
+          #6d4724,
+          #a27745,
+          #5d381a
+        );
+
+      box-shadow:
+        4px 8px 10px
+        rgba(0, 0, 0, 0.35);
+    }
+
+    .barrier-arm {
+      position: absolute;
+
+      left: 37px;
+      bottom: 73px;
+
+      width: 245px;
+      height: 30px;
+
+      border:
+        3px solid
+        #503016;
+
+      border-radius: 5px;
+
+      background:
+        repeating-linear-gradient(
+          90deg,
+          #8b5a2b 0,
+          #8b5a2b 38px,
+          #b8864c 38px,
+          #b8864c 76px
+        );
+
+      box-shadow:
+        4px 7px 10px
+        rgba(0, 0, 0, 0.4);
+
+      transform-origin:
+        left center;
+
+      transition:
+        transform 1.8s
+        cubic-bezier(
+          0.3,
+          0,
+          0.2,
+          1
+        );
+    }
+
+    .barrier-area.open
+    .barrier-arm {
+      transform:
+        rotate(-72deg);
+    }
+
+    .barrier-sign {
+      position: absolute;
+
+      right: 20px;
+      bottom: 14px;
+
+      padding:
+        6px
+        10px;
+
+      border-radius: 8px;
+
+      background:
+        rgba(45, 28, 13, 0.82);
+
+      color: #f3dfaa;
+
+      font-size: 12px;
+    }
+
+
+    /* ==================================================
+       ÚKOL
+       ================================================== */
+
+    .task-panel {
+      position: absolute;
+
+      left: 50%;
+      top: 50%;
+
+      transform:
+        translate(
+          -50%,
+          -50%
+        );
+
+      width:
+        min(
+          820px,
+          82vw
+        );
+
+      z-index: 100;
+
+      padding:
+        20px
+        24px;
+
+      background:
+        linear-gradient(
+          145deg,
+          rgba(249, 239, 214, 0.99),
+          rgba(224, 199, 153, 0.99)
+        );
+
+      border:
+        3px solid
+        #a97834;
+
+      border-radius: 22px;
+
+      box-shadow:
+        0 22px 55px
+        rgba(0, 0, 0, 0.55);
+
+      color: #482b1b;
+
+      text-align: center;
+    }
+
+    .task-panel h2 {
+      margin:
+        0
+        0
+        7px;
+
+      color: #684123;
+
+      font-size: 29px;
+    }
+
+    .task-panel p {
+      margin:
+        0
+        0
+        14px;
+
+      font-size: 15px;
+    }
+
+    .task-grid {
+      display: grid;
+
+      grid-template-columns:
+        repeat(
+          3,
+          1fr
+        );
+
+      gap: 12px;
+    }
+
+    .task-card {
+      min-height: 92px;
+
+      padding:
+        12px;
+
+      border:
+        3px solid
+        #bf9557;
+
+      border-radius: 14px;
+
+      background:
+        #fff8e8;
+
+      color: #56351f;
+
+      font-size: 15px;
+
+      font-weight: bold;
+
+      cursor: pointer;
+
+      transition:
+        transform 0.18s ease,
+        background 0.18s ease,
+        border-color 0.18s ease;
+
+      touch-action: manipulation;
+    }
+
+    .task-card:active {
+      transform: scale(0.97);
+    }
+
+    .task-card.correct {
+      background: #dbe8bd;
+
+      border-color: #63813c;
+
+      color: #3a5721;
+    }
+
+    .task-card.correct::after {
+      content: " ✓";
+    }
+
+    .task-card.wrong {
+      animation:
+        wrongFlash 0.5s ease;
+    }
+
+    @keyframes wrongFlash {
+
+      0%,
+      100% {
+        background: #fff8e8;
+      }
+
+      50% {
+        background: #edb8a9;
+
+        border-color: #a33f2c;
+      }
+
+    }
+
+    .task-feedback {
+      min-height: 26px;
+
+      margin-top: 12px;
+
+      font-weight: bold;
+    }
+
+
+    /* ==================================================
+       TLAČÍTKO DO MĚSTA
+       ================================================== */
+
+    .city-button {
+      position: absolute;
+
+      right: 4.5%;
+      bottom: 4%;
+
+      z-index: 30;
+
+      padding:
+        13px
+        28px;
+
+      border:
+        3px solid
+        #f2d58e;
+
+      border-radius: 15px;
+
+      background:
+        linear-gradient(
+          145deg,
+          #b58033,
+          #704819
+        );
+
+      color: #fff5d2;
+
+      text-decoration: none;
+
+      font-size: 18px;
+
+      font-weight: bold;
+
+      box-shadow:
+        0 9px 20px
+        rgba(0, 0, 0, 0.4);
+
+      animation:
+        cityButtonAppear 0.8s ease;
+
+      touch-action: manipulation;
+    }
+
+    @keyframes cityButtonAppear {
+
+      from {
+        opacity: 0;
+        transform:
+          translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform:
+          translateY(0);
+      }
+
+    }
+
+
+    /* ==================================================
+       ZTMAVENÍ POZADÍ
+       ================================================== */
+
+    .overlay {
+      position: absolute;
+
+      inset: 0;
+
+      z-index: 80;
+
+      background:
+        rgba(26, 16, 7, 0.46);
+    }
+
+
+    /* ==================================================
+       TABLET NALEŽATO
+       ================================================== */
+
+    @media
+      (orientation: landscape)
+      and
+      (max-height: 850px) {
+
+      .player {
+        height: 64%;
+      }
+
+      .hotspot {
+        width: 52px;
+        height: 52px;
+
+        font-size: 22px;
+      }
+
+      .scroll-button {
+        width: 138px;
+        height: 47px;
+
+        font-size: 14px;
+      }
+
+      .scroll-area {
+        top: 13%;
+
+        gap: 8px;
+      }
+
+      .info-panel {
+        padding:
+          18px
+          24px;
+      }
+
+      .task-panel {
+        padding:
+          15px
+          20px;
+      }
+
+      .task-card {
+        min-height: 78px;
+
+        padding: 9px;
+
+        font-size: 14px;
+      }
+
+      .barrier-area {
+        transform: scale(0.88);
+
+        transform-origin:
+          bottom right;
+      }
+
+    }
+
+
+    /* ==================================================
+       TABLET NA VÝŠKU
+       ================================================== */
+
+    .rotate-warning {
+      display: none;
+    }
+
+    @media
+      (orientation: portrait) {
+
+      .rotate-warning {
+        position: fixed;
+
+        inset: 0;
+
+        z-index: 99999;
+
+        display: flex;
+
+        flex-direction: column;
+
+        justify-content: center;
+        align-items: center;
+
+        padding: 35px;
+
+        background:
+          #382113;
+
+        color: #f7e5b8;
+
+        text-align: center;
+      }
+
+      .rotate-warning div {
+        font-size: 70px;
+      }
+
+      .rotate-warning h2 {
+        margin:
+          15px
+          0
+          8px;
+
+        font-size: 30px;
+      }
+
+      .rotate-warning p {
+        max-width: 450px;
+
+        font-size: 18px;
+      }
+
+    }
+
+  </style>
+</head>
+
+
+<body>
+
+
+  <!-- ==================================================
+       OTOČENÍ TABLETU
+       ================================================== -->
+
+  <div class="rotate-warning">
+
+    <div>
+      ↻
+    </div>
+
+    <h2>
+      Otoč tablet na šířku
+    </h2>
+
+    <p>
+      Tato hra je připravena pro hraní
+      na tabletu naležato.
+    </p>
+
+  </div>
+
+
+
+  <!-- ==================================================
+       SCÉNA
+       ================================================== -->
+
+  <main
+    class="scene"
+    id="scene"
+  >
+
+
+    <!-- HLAVIČKA -->
+
+    <div class="top-bar">
+
+      <div class="top-title">
+        VENKOV
+      </div>
+
+      <div
+        class="progress"
+        id="progress"
+      >
+        PROZKOUMÁNO 0 / 4
+      </div>
+
+    </div>
+
+
+
+    <!-- ==================================================
+         HRÁČ
+         ================================================== -->
+
+    <div class="player">
+
+      <img
+        id="playerImage"
+        src=""
+        alt="Tvoje postava"
+      >
+
+    </div>
+
+
+
+    <!-- ==================================================
+         INTERAKTIVNÍ BODY
+         ================================================== -->
+
+    <button
+      class="hotspot hotspot-house"
+      data-info="house"
+      aria-label="Chalupa"
+    >
+      🏠
+    </button>
+
+
+    <button
+      class="hotspot hotspot-field"
+      data-info="field"
+      aria-label="Pole"
+    >
+      🌾
+    </button>
+
+
+    <button
+      class="hotspot hotspot-barn"
+      data-info="barn"
+      aria-label="Hospodářství"
+    >
+      🧺
+    </button>
+
+
+    <button
+      class="hotspot hotspot-road"
+      data-info="road"
+      aria-label="Cesta do města"
+    >
+      🛤️
+    </button>
+
+
+
+    <!-- ==================================================
+         SVITKY
+         ================================================== -->
+
+    <div class="scroll-area">
+
+      <div class="scroll-title">
+        TAJEMSTVÍ BAROKA
+      </div>
+
+
+      <button
+        class="scroll-button"
+        data-question="kdy"
+      >
+        KDY?
+      </button>
+
+
+      <button
+        class="scroll-button"
+        data-question="kde"
+      >
+        KDE?
+      </button>
+
+
+      <button
+        class="scroll-button"
+        data-question="co"
+      >
+        CO JE BAROKO?
+      </button>
+
+    </div>
+
+
+
+    <!-- ==================================================
+         ZÁVORA
+         ================================================== -->
+
+    <div
+      class="barrier-area"
+      id="barrier"
+    >
+
+      <div class="barrier-post"></div>
+
+      <div class="barrier-arm"></div>
+
+      <div class="barrier-sign">
+        CESTA DO MĚSTA
+      </div>
+
+    </div>
+
+
+
+    <!-- ==================================================
+         ZTMAVENÍ
+         ================================================== -->
+
+    <div
+      class="overlay"
+      id="overlay"
+    ></div>
+
+
+
+    <!-- ==================================================
+         ÚVOD
+         ================================================== -->
+
+    <section
+      class="info-panel"
+      id="introPanel"
+    >
+
+      <h2>
+        KDE TO JSEM?
+      </h2>
+
+      <p>
+        Probudil/a ses na venkově
+        v době baroka.
+      </p>
+
+      <p>
+        Zatím nevíš, jak ses sem dostal/a.
+        Pokud se chceš dostat do města,
+        musíš nejdříve poznat svět,
+        ve kterém ses ocitl/a.
+      </p>
+
+      <button
+        class="panel-button"
+        id="startButton"
+      >
+        ROZHLÉDNOUT SE
+      </button>
+
+    </section>
+
+
+
+    <!-- ==================================================
+         INFORMAČNÍ OKNO
+         ================================================== -->
+
+    <section
+      class="info-panel"
+      id="infoPanel"
+      hidden
+    >
+
+      <h2 id="infoTitle"></h2>
+
+      <div id="infoText"></div>
+
+      <button
+        class="panel-button"
+        id="closeInfo"
+      >
+        ROZUMÍM
+      </button>
+
+    </section>
+
+
+
+    <!-- ==================================================
+         OTÁZKA SVITKU
+         ================================================== -->
+
+    <section
+      class="info-panel"
+      id="questionPanel"
+      hidden
+    >
+
+      <h2 id="questionTitle"></h2>
+
+      <p id="questionText"></p>
+
+      <div
+        class="question-options"
+        id="questionOptions"
+      ></div>
+
+      <div
+        class="question-feedback"
+        id="questionFeedback"
+      ></div>
+
+      <button
+        class="panel-button"
+        id="closeQuestion"
+        hidden
+      >
+        POKRAČOVAT
+      </button>
+
+    </section>
+
+
+
+    <!-- ==================================================
+         ÚKOL
+         ================================================== -->
+
+    <section
+      class="task-panel"
+      id="taskPanel"
+      hidden
+    >
+
+      <h2>
+        CO PATŘÍ K ŽIVOTU VENKOVANA?
+      </h2>
+
+      <p>
+        Vyber tři možnosti,
+        které patří k životu venkovana
+        v době baroka.
+      </p>
+
+
+      <div class="task-grid">
+
+        <button
+          class="task-card"
+          data-correct="true"
+        >
+          🌾 Práce na poli
+        </button>
+
+
+        <button
+          class="task-card"
+          data-correct="true"
+        >
+          🛠️ Robotní povinnost
+        </button>
+
+
+        <button
+          class="task-card"
+          data-correct="true"
+        >
+          🧺 Povinné dávky vrchnosti
+        </button>
+
+
+        <button
+          class="task-card"
+          data-correct="false"
+        >
+          🎭 Každodenní návštěva divadla
+        </button>
+
+
+        <button
+          class="task-card"
+          data-correct="false"
+        >
+          🐎 Vlastní kočár se služebnictvem
+        </button>
+
+
+        <button
+          class="task-card"
+          data-correct="false"
+        >
+          👑 Život v reprezentačním
+          zámeckém sále
+        </button>
+
+      </div>
+
+
+      <div
+        class="task-feedback"
+        id="taskFeedback"
+      ></div>
+
+    </section>
+
+
+
+    <!-- ==================================================
+         CESTA DO MĚSTA
+         ================================================== -->
+
+    <a
+      href="mestanske-obleceni.html"
+      class="city-button"
+      id="cityButton"
+      hidden
+    >
+      VYDAT SE DO MĚSTA →
+    </a>
+
+
+  </main>
+
+
+
+  <script>
+
+    /* ==================================================
+       POSTAVA PODLE POHLAVÍ
+       ================================================== */
+
+    const gender =
+      localStorage.getItem(
+        "pohlavi"
+      );
+
+
+    const playerImage =
+      document.getElementById(
+        "playerImage"
+      );
+
+
+    if (gender === "zena") {
+
+      playerImage.src =
+        "images/chuda-zena-prace.png";
+
+    }
+
+    else {
+
+      playerImage.src =
+        "images/chudy-muz-prace.png";
+
+    }
+
+
+
+    /* ==================================================
+       PRVKY
+       ================================================== */
+
+    const overlay =
+      document.getElementById(
+        "overlay"
+      );
+
+
+    const introPanel =
+      document.getElementById(
+        "introPanel"
+      );
+
+
+    const startButton =
+      document.getElementById(
+        "startButton"
+      );
+
+
+    const infoPanel =
+      document.getElementById(
+        "infoPanel"
+      );
+
+
+    const infoTitle =
+      document.getElementById(
+        "infoTitle"
+      );
+
+
+    const infoText =
+      document.getElementById(
+        "infoText"
+      );
+
+
+    const closeInfo =
+      document.getElementById(
+        "closeInfo"
+      );
+
+
+    const progress =
+      document.getElementById(
+        "progress"
+      );
+
+
+    const hotspots =
+      document.querySelectorAll(
+        ".hotspot"
+      );
+
+
+    const scrollButtons =
+      document.querySelectorAll(
+        ".scroll-button"
+      );
+
+
+    const questionPanel =
+      document.getElementById(
+        "questionPanel"
+      );
+
+
+    const questionTitle =
+      document.getElementById(
+        "questionTitle"
+      );
+
+
+    const questionText =
+      document.getElementById(
+        "questionText"
+      );
+
+
+    const questionOptions =
+      document.getElementById(
+        "questionOptions"
+      );
+
+
+    const questionFeedback =
+      document.getElementById(
+        "questionFeedback"
+      );
+
+
+    const closeQuestion =
+      document.getElementById(
+        "closeQuestion"
+      );
+
+
+    const taskPanel =
+      document.getElementById(
+        "taskPanel"
+      );
+
+
+    const taskCards =
+      document.querySelectorAll(
+        ".task-card"
+      );
+
+
+    const taskFeedback =
+      document.getElementById(
+        "taskFeedback"
+      );
+
+
+    const barrier =
+      document.getElementById(
+        "barrier"
+      );
+
+
+    const cityButton =
+      document.getElementById(
+        "cityButton"
+      );
+
+
+
+    /* ==================================================
+       ÚVOD
+       ================================================== */
+
+    startButton.addEventListener(
+      "click",
+      function () {
+
+        introPanel.hidden =
+          true;
+
+
+        overlay.hidden =
+          true;
+
+      }
+    );
+
+
+
+    /* ==================================================
+       INFORMACE O VENKOVĚ
+       ================================================== */
+
+    const information = {
+
+      house: {
+
+        title:
+          "ŽIVOT NA VENKOVĚ",
+
+        text:
+          `
+            <p>
+              Většina venkovského obyvatelstva
+              žila velmi skromně.
+            </p>
+
+            <p>
+              Domy byly jednoduché a život celé
+              rodiny se soustředil kolem práce
+              a hospodářství.
+            </p>
+          `
+
+      },
+
+
+      field: {
+
+        title:
+          "PRÁCE",
+
+        text:
+          `
+            <p>
+              Hlavním zdrojem obživy bylo
+              zemědělství.
+            </p>
+
+            <p>
+              Lidé obdělávali pole, chovali
+              zvířata a část roku pracovali
+              také pro vrchnost.
+            </p>
+
+            <span class="info-keyword">
+              ROBOTA
+            </span>
+
+            <p>
+              Robota byla povinná práce
+              poddaných pro vrchnost.
+            </p>
+          `
+
+      },
+
+
+      barn: {
+
+        title:
+          "POVINNOSTI",
+
+        text:
+          `
+            <p>
+              Venkované museli odvádět
+              vrchnosti různé dávky.
+            </p>
+
+            <p>
+              Část povinností mohla být
+              placena penězi, naturáliemi
+              nebo prací.
+            </p>
+
+            <p>
+              Církvi se tradičně odváděl
+              také desátek.
+            </p>
+          `
+
+      },
+
+
+      road: {
+
+        title:
+          "CESTA DO MĚSTA",
+
+        text:
+          `
+            <p>
+              Cesta je zatím uzavřená.
+            </p>
+
+            <p>
+              Nejprve prozkoumej venkov,
+              odpověz na otázky ve svitcích
+              a splň úkol.
+            </p>
+          `
+
+      }
+
+    };
+
+
+    const visitedPlaces =
+      new Set();
+
+
+    hotspots.forEach(
+      function (hotspot) {
+
+        hotspot.addEventListener(
+          "click",
+          function () {
+
+            const key =
+              hotspot.dataset.info;
+
+
+            const data =
+              information[key];
+
+
+            infoTitle.textContent =
+              data.title;
+
+
+            infoText.innerHTML =
+              data.text;
+
+
+            overlay.hidden =
+              false;
+
+
+            infoPanel.hidden =
+              false;
+
+
+            visitedPlaces.add(
+              key
+            );
+
+
+            hotspot.classList.add(
+              "done"
+            );
+
+
+            updateProgress();
+
+          }
+        );
+
+      }
+    );
+
+
+    closeInfo.addEventListener(
+      "click",
+      function () {
+
+        infoPanel.hidden =
+          true;
+
+
+        overlay.hidden =
+          true;
+
+
+        checkTaskUnlock();
+
+      }
+    );
+
+
+
+    /* ==================================================
+       POSTUP
+       ================================================== */
+
+    function updateProgress() {
+
+      progress.textContent =
+        "PROZKOUMÁNO "
+        +
+        visitedPlaces.size
+        +
+        " / 4";
+
+    }
+
+
+
+    /* ==================================================
+       SVITKOVÉ OTÁZKY
+       ================================================== */
+
+    const questions = {
+
+      kdy: {
+
+        title:
+          "KDY?",
+
+        question:
+          "Ve kterých stoletích se baroko nejvíce rozšířilo v Evropě?",
+
+        answers: [
+
+          {
+            text:
+              "V 15. a 16. století",
+
+            correct:
+              false
+          },
+
+          {
+            text:
+              "V 17. a 18. století",
+
+            correct:
+              true
+          },
+
+          {
+            text:
+              "V 19. a 20. století",
+
+            correct:
+              false
+          }
+
+        ]
+
+      },
+
+
+      kde: {
+
+        title:
+          "KDE?",
+
+        question:
+          "Ve které zemi baroko vzniklo?",
+
+        answers: [
+
+          {
+            text:
+              "V Itálii",
+
+            correct:
+              true
+          },
+
+          {
+            text:
+              "V Anglii",
+
+            correct:
+              false
+          },
+
+          {
+            text:
+              "Ve Švédsku",
+
+            correct:
+              false
+          }
+
+        ]
+
+      },
+
+
+      co: {
+
+        title:
+          "CO JE BAROKO?",
+
+        question:
+          "Co označujeme slovem baroko?",
+
+        answers: [
+
+          {
+            text:
+              "Pouze způsob stavby kostelů",
+
+            correct:
+              false
+          },
+
+          {
+            text:
+              "Umělecký a kulturní styl, který ovlivnil architekturu, malířství, hudbu i život společnosti",
+
+            correct:
+              true
+          },
+
+          {
+            text:
+              "Druh středověkého zemědělství",
+
+            correct:
+              false
+          }
+
+        ]
+
+      }
+
+    };
+
+
+    const completedQuestions =
+      new Set();
+
+
+    let activeScrollButton =
+      null;
+
+
+    scrollButtons.forEach(
+      function (scrollButton) {
+
+        scrollButton.addEventListener(
+          "click",
+          function () {
+
+            if (
+              scrollButton.classList.contains(
+                "done"
+              )
+            ) {
+
+              return;
+
+            }
+
+
+            activeScrollButton =
+              scrollButton;
+
+
+            const key =
+              scrollButton.dataset.question;
+
+
+            const data =
+              questions[key];
+
+
+            questionTitle.textContent =
+              data.title;
+
+
+            questionText.textContent =
+              data.question;
+
+
+            questionOptions.innerHTML =
+              "";
+
+
+            questionFeedback.textContent =
+              "";
+
+
+            closeQuestion.hidden =
+              true;
+
+
+            data.answers.forEach(
+              function (answer) {
+
+                const button =
+                  document.createElement(
+                    "button"
+                  );
+
+
+                button.className =
+                  "answer-button";
+
+
+                button.textContent =
+                  answer.text;
+
+
+                button.addEventListener(
+                  "click",
+                  function () {
+
+                    if (answer.correct) {
+
+                      questionFeedback.style.color =
+                        "#53752e";
+
+
+                      questionFeedback.textContent =
+                        "✓ Správně!";
+
+
+                      completedQuestions.add(
+                        key
+                      );
+
+
+                      activeScrollButton
+                        .classList
+                        .add(
+                          "done"
+                        );
+
+
+                      closeQuestion.hidden =
+                        false;
+
+
+                      Array.from(
+                        questionOptions.children
+                      )
+                      .forEach(
+                        function (item) {
+
+                          item.disabled =
+                            true;
+
+                        }
+                      );
+
+                    }
+
+                    else {
+
+                      questionFeedback.style.color =
+                        "#9a3827";
+
+
+                      questionFeedback.textContent =
+                        "✕ Zkus to ještě jednou.";
+
+                    }
+
+                  }
+                );
+
+
+                questionOptions.appendChild(
+                  button
+                );
+
+              }
+            );
+
+
+            overlay.hidden =
+              false;
+
+
+            questionPanel.hidden =
+              false;
+
+          }
+        );
+
+      }
+    );
+
+
+    closeQuestion.addEventListener(
+      "click",
+      function () {
+
+        questionPanel.hidden =
+          true;
+
+
+        overlay.hidden =
+          true;
+
+
+        checkTaskUnlock();
+
+      }
+    );
+
+
+
+    /* ==================================================
+       ODEMČENÍ ÚKOLU
+       ================================================== */
+
+    let taskStarted =
+      false;
+
+
+    function checkTaskUnlock() {
+
+      if (
+        taskStarted
+      ) {
+
+        return;
+
+      }
+
+
+      if (
+        visitedPlaces.size === 4
+        &&
+        completedQuestions.size === 3
+      ) {
+
+        taskStarted =
+          true;
+
+
+        setTimeout(
+          function () {
+
+            overlay.hidden =
+              false;
+
+
+            taskPanel.hidden =
+              false;
+
+          },
+          400
+        );
+
+      }
+
+    }
+
+
+
+    /* ==================================================
+       ZÁVĚREČNÝ ÚKOL
+       ================================================== */
+
+    let correctChoices =
+      0;
+
+
+    taskCards.forEach(
+      function (card) {
+
+        card.addEventListener(
+          "click",
+          function () {
+
+            if (
+              card.classList.contains(
+                "correct"
+              )
+            ) {
+
+              return;
+
+            }
+
+
+            const correct =
+              card.dataset.correct
+              ===
+              "true";
+
+
+            if (correct) {
+
+              card.classList.add(
+                "correct"
+              );
+
+
+              card.disabled =
+                true;
+
+
+              correctChoices++;
+
+
+              taskFeedback.style.color =
+                "#53752e";
+
+
+              taskFeedback.textContent =
+                "✓ Správně!";
+
+
+              if (
+                correctChoices === 3
+              ) {
+
+                completeVillage();
+
+              }
+
+            }
+
+            else {
+
+              card.classList.remove(
+                "wrong"
+              );
+
+
+              void card.offsetWidth;
+
+
+              card.classList.add(
+                "wrong"
+              );
+
+
+              taskFeedback.style.color =
+                "#9a3827";
+
+
+              taskFeedback.textContent =
+                "✕ Tohle k běžnému životu venkovana nepatří.";
+
+            }
+
+          }
+        );
+
+      }
+    );
+
+
+
+    /* ==================================================
+       DOKONČENÍ VENKOVA
+       ================================================== */
+
+    function completeVillage() {
+
+      taskFeedback.style.color =
+        "#53752e";
+
+
+      taskFeedback.textContent =
+        "✓ Výborně! Cesta do města se otevírá.";
+
+
+      setTimeout(
+        function () {
+
+          taskPanel.hidden =
+            true;
+
+
+          overlay.hidden =
+            true;
+
+
+          barrier.classList.add(
+            "open"
+          );
+
+
+          setTimeout(
+            function () {
+
+              cityButton.hidden =
+                false;
+
+            },
+            1500
+          );
+
+        },
+        1100
+      );
+
+    }
+
+  </script>
+
+</body>
+
+</html>

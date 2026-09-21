@@ -1,0 +1,2016 @@
+<!DOCTYPE html>
+<html lang="cs">
+
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  >
+
+  <title>Baroko – Šatlava</title>
+
+
+  <style>
+
+    /* ==================================================
+       ZÁKLAD
+       ================================================== */
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+      background: #15110d;
+    }
+
+    button,
+    a {
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+
+    /* ==================================================
+       HLAVNÍ SCÉNA
+       ================================================== */
+
+    .scene {
+      position: relative;
+
+      width: 100%;
+      height: 100svh;
+
+      overflow: hidden;
+
+      background-image:
+        linear-gradient(
+          rgba(20, 14, 9, 0.12),
+          rgba(20, 14, 9, 0.30)
+        ),
+        url("images/satlava-pozadi.png");
+
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+
+    /* ==================================================
+       HLAVIČKA
+       ================================================== */
+
+    .top-bar {
+      position: absolute;
+
+      top: 10px;
+      left: 50%;
+
+      transform: translateX(-50%);
+
+      z-index: 50;
+
+      display: flex;
+      align-items: center;
+
+      gap: 30px;
+
+      padding:
+        8px
+        22px;
+
+      border:
+        1px solid
+        rgba(227, 193, 125, 0.55);
+
+      border-radius: 17px;
+
+      background:
+        rgba(44, 30, 19, 0.85);
+
+      color: #f3dfad;
+
+      box-shadow:
+        0 5px 18px
+        rgba(0, 0, 0, 0.45);
+    }
+
+    .room-title {
+      font-size:
+        clamp(
+          17px,
+          2vw,
+          23px
+        );
+
+      font-weight: bold;
+
+      letter-spacing: 4px;
+    }
+
+    .progress {
+      font-size:
+        clamp(
+          12px,
+          1.3vw,
+          15px
+        );
+
+      white-space: nowrap;
+    }
+
+
+    /* ==================================================
+       POSTAVA HRÁČE
+       ================================================== */
+
+   .player {
+  position: absolute;
+
+  left: 5%;
+  top: 15%;
+
+  width: 46%;
+  height: 30%;
+
+  z-index: 15;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  pointer-events: none;
+}
+
+.player img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center center;
+
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.28));
+}
+
+.player img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: contain;
+  object-position: left bottom;
+
+  filter:
+    drop-shadow(
+      0 8px 10px
+      rgba(0, 0, 0, 0.35)
+    );
+}
+
+
+    /* ==================================================
+       INTERAKTIVNÍ BODY
+       ================================================== */
+
+    .hotspot {
+      position: absolute;
+
+      z-index: 30;
+
+      width: 56px;
+      height: 56px;
+
+      border:
+        3px solid
+        #e6c77e;
+
+      border-radius: 50%;
+
+      background:
+        rgba(92, 62, 32, 0.88);
+
+      color: #fff0c3;
+
+      font-size: 23px;
+
+      display: flex;
+
+      justify-content: center;
+      align-items: center;
+
+      cursor: pointer;
+
+      touch-action: manipulation;
+
+      animation:
+        pulse
+        1.7s
+        infinite;
+    }
+
+
+    @keyframes pulse {
+
+      0% {
+        box-shadow:
+          0 0 0 0
+          rgba(241, 205, 123, 0.65);
+      }
+
+      70% {
+        box-shadow:
+          0 0 0 15px
+          rgba(241, 205, 123, 0);
+      }
+
+      100% {
+        box-shadow:
+          0 0 0 0
+          rgba(241, 205, 123, 0);
+      }
+
+    }
+
+
+    .hotspot.done {
+      background: #5b7438;
+
+      border-color: #dbeaab;
+
+      animation: none;
+    }
+
+
+    .hotspot.done::after {
+      content: "✓";
+
+      position: absolute;
+
+      top: -8px;
+      right: -6px;
+
+      width: 23px;
+      height: 23px;
+
+      border-radius: 50%;
+
+      display: flex;
+
+      justify-content: center;
+      align-items: center;
+
+      background: #405d25;
+
+      color: white;
+
+      font-size: 14px;
+    }
+
+
+    /* pozice bodů */
+
+    .hotspot-cell {
+      left: 38%;
+      top: 39%;
+    }
+
+    .hotspot-straw {
+      left: 50%;
+      top: 68%;
+    }
+
+    .hotspot-bars {
+      left: 71%;
+      top: 42%;
+    }
+
+
+    /* ==================================================
+       OVERLAY
+       ================================================== */
+
+    .overlay {
+      position: absolute;
+
+      inset: 0;
+
+      z-index: 80;
+
+      background:
+        rgba(14, 9, 5, 0.57);
+    }
+
+
+    /* ==================================================
+       SPOLEČNÉ PANELY
+       ================================================== */
+
+    .panel {
+      position: absolute;
+
+      left: 50%;
+      top: 50%;
+
+      transform:
+        translate(
+          -50%,
+          -50%
+        );
+
+      z-index: 100;
+
+      width:
+        min(
+          620px,
+          62vw
+        );
+
+      padding:
+        22px
+        29px;
+
+      border:
+        3px solid
+        #a97b3d;
+
+      border-radius: 22px;
+
+      background:
+        linear-gradient(
+          145deg,
+          rgba(245, 234, 208, 0.99),
+          rgba(211, 185, 139, 0.99)
+        );
+
+      color: #432a1a;
+
+      text-align: center;
+
+      box-shadow:
+        0 22px 55px
+        rgba(0, 0, 0, 0.65);
+    }
+
+
+    .panel h2 {
+      margin:
+        0
+        0
+        10px;
+
+      color: #674220;
+
+      font-size:
+        clamp(
+          24px,
+          3vw,
+          34px
+        );
+    }
+
+
+    .panel p {
+      margin:
+        0
+        0
+        10px;
+
+      font-size:
+        clamp(
+          14px,
+          1.55vw,
+          18px
+        );
+
+      line-height: 1.42;
+    }
+
+
+    .important-word {
+      display: inline-block;
+
+      margin:
+        5px
+        0
+        10px;
+
+      padding:
+        6px
+        15px;
+
+      border-radius: 9px;
+
+      background: #79522c;
+
+      color: #fff0c8;
+
+      font-size: 18px;
+
+      font-weight: bold;
+    }
+
+
+    .panel-button {
+      margin-top: 10px;
+
+      padding:
+        10px
+        28px;
+
+      border:
+        2px solid
+        #efd18b;
+
+      border-radius: 11px;
+
+      background:
+        linear-gradient(
+          #b6813a,
+          #765020
+        );
+
+      color: #fff4d0;
+
+      font-size: 16px;
+
+      font-weight: bold;
+
+      cursor: pointer;
+
+      touch-action: manipulation;
+    }
+
+
+    .panel-button:active {
+      transform: scale(0.96);
+    }
+
+
+    /* ==================================================
+       ÚKOL
+       ================================================== */
+
+    .task-panel {
+      width:
+        min(
+          790px,
+          79vw
+        );
+    }
+
+
+    .task-label {
+      margin-bottom: 3px;
+
+      color: #906227;
+
+      font-size: 12px;
+
+      font-weight: bold;
+
+      letter-spacing: 3px;
+    }
+
+
+    .question {
+      margin:
+        12px
+        0;
+
+      font-size:
+        clamp(
+          17px,
+          1.9vw,
+          21px
+        );
+
+      font-weight: bold;
+    }
+
+
+    .answers {
+      display: grid;
+
+      grid-template-columns:
+        repeat(
+          3,
+          1fr
+        );
+
+      gap: 11px;
+    }
+
+
+    .answer {
+      min-height: 78px;
+
+      padding:
+        10px;
+
+      border:
+        2px solid
+        #b98b4b;
+
+      border-radius: 12px;
+
+      background: #fff8e9;
+
+      color: #4d301b;
+
+      font-size: 14px;
+
+      font-weight: bold;
+
+      cursor: pointer;
+
+      touch-action: manipulation;
+    }
+
+
+    .answer:active {
+      transform: scale(0.97);
+    }
+
+
+    .answer.correct {
+      background: #dce9bd;
+
+      border-color: #66823e;
+
+      color: #395520;
+    }
+
+
+    .answer.wrong {
+      animation:
+        wrongFlash
+        0.5s ease;
+    }
+
+
+    @keyframes wrongFlash {
+
+      0%,
+      100% {
+        background: #fff8e9;
+      }
+
+      50% {
+        background: #efb9aa;
+
+        border-color: #a3422f;
+      }
+
+    }
+
+
+    .task-feedback {
+      min-height: 25px;
+
+      margin-top: 9px;
+
+      font-weight: bold;
+    }
+
+
+    /* ==================================================
+       MŘÍŽ
+       ================================================== */
+
+    .gate {
+      position: absolute;
+
+      right: -1%;
+      top: 7%;
+
+      z-index: 55;
+
+      width: 27%;
+      height: 88%;
+
+      pointer-events: none;
+
+      transform-origin:
+        right center;
+
+      transition:
+        transform
+        1.8s
+        cubic-bezier(
+          0.22,
+          0.75,
+          0.22,
+          1
+        );
+    }
+
+
+    .gate-frame {
+      position: absolute;
+
+      inset: 0;
+
+      border:
+        11px solid
+        #2e261f;
+
+      border-radius: 5px;
+
+      background:
+        repeating-linear-gradient(
+          90deg,
+          transparent 0,
+          transparent 26px,
+          #302820 26px,
+          #302820 35px
+        );
+
+      box-shadow:
+        inset 0 0 25px
+        rgba(0, 0, 0, 0.85),
+        -8px 5px 25px
+        rgba(0, 0, 0, 0.5);
+    }
+
+
+    .gate-frame::before {
+      content: "";
+
+      position: absolute;
+
+      left: 0;
+      right: 0;
+      top: 47%;
+
+      height: 10px;
+
+      background: #302820;
+    }
+
+
+    .gate-lock {
+      position: absolute;
+
+      left: 43%;
+      top: 48%;
+
+      width: 40px;
+      height: 46px;
+
+      transform:
+        translate(
+          -50%,
+          -50%
+        );
+
+      border:
+        4px solid
+        #46371f;
+
+      border-radius: 7px;
+
+      background:
+        #9a7b41;
+    }
+
+
+    .gate.open {
+      transform:
+        perspective(1000px)
+        rotateY(-78deg);
+    }
+
+
+    /* ==================================================
+       STRÁŽNÝ
+       ================================================== */
+
+    .guard {
+      position: absolute;
+
+      right: 5%;
+      bottom: 0;
+
+      z-index: 48;
+
+      width: 22%;
+      height: 68%;
+
+      display: flex;
+
+      justify-content: center;
+      align-items: flex-end;
+
+      opacity: 0;
+
+      transform:
+        translateX(130px);
+
+      pointer-events: none;
+
+      transition:
+        opacity 0.7s ease,
+        transform 0.9s ease;
+    }
+
+
+    .guard img {
+      max-width: 100%;
+      max-height: 100%;
+
+      object-fit: contain;
+
+      filter:
+        drop-shadow(
+          0 11px 14px
+          rgba(0, 0, 0, 0.62)
+        );
+    }
+
+
+    .guard.show {
+      opacity: 1;
+
+      transform:
+        translateX(0);
+    }
+
+
+    /* ==================================================
+       BUBLINA STRÁŽNÉHO
+       ================================================== */
+
+    .guard-bubble {
+      position: absolute;
+
+      right: 23%;
+      top: 18%;
+
+      z-index: 70;
+
+      width:
+        min(
+          430px,
+          35vw
+        );
+
+      padding:
+        18px
+        21px;
+
+      border:
+        3px solid
+        #aa7939;
+
+      border-radius: 20px;
+
+      background:
+        linear-gradient(
+          145deg,
+          #f4e6c7,
+          #d8bd8a
+        );
+
+      color: #42291a;
+
+      box-shadow:
+        0 15px 35px
+        rgba(0, 0, 0, 0.48);
+
+      opacity: 0;
+
+      transform:
+        translateY(14px)
+        scale(0.95);
+
+      pointer-events: none;
+
+      transition:
+        opacity 0.55s ease,
+        transform 0.55s ease;
+    }
+
+
+    .guard-bubble.show {
+      opacity: 1;
+
+      transform:
+        translateY(0)
+        scale(1);
+
+      pointer-events: auto;
+    }
+
+
+    .guard-bubble::after {
+      content: "";
+
+      position: absolute;
+
+      right: -25px;
+      bottom: 33px;
+
+      width: 0;
+      height: 0;
+
+      border-top:
+        15px solid transparent;
+
+      border-bottom:
+        15px solid transparent;
+
+      border-left:
+        27px solid #dfc797;
+    }
+
+
+    .guard-bubble h3 {
+      margin:
+        0
+        0
+        8px;
+
+      color: #69431f;
+
+      font-size:
+        clamp(
+          19px,
+          2vw,
+          24px
+        );
+    }
+
+
+    .guard-bubble p {
+      margin:
+        0
+        0
+        9px;
+
+      font-size:
+        clamp(
+          13px,
+          1.35vw,
+          16px
+        );
+
+      line-height: 1.4;
+    }
+
+
+    .next-button {
+      display: inline-block;
+
+      margin-top: 5px;
+
+      padding:
+        10px
+        22px;
+
+      border:
+        2px solid
+        #efd18b;
+
+      border-radius: 11px;
+
+      background:
+        linear-gradient(
+          #b67e35,
+          #714718
+        );
+
+      color: #fff4cd;
+
+      text-decoration: none;
+
+      font-size: 15px;
+
+      font-weight: bold;
+
+      touch-action: manipulation;
+    }
+
+
+    /* ==================================================
+       TABLET NALEŽATO
+       ================================================== */
+
+    @media
+      (orientation: landscape)
+      and
+      (max-height: 850px) {
+
+      .player {
+        height: 62%;
+      }
+
+      .guard {
+        height: 64%;
+      }
+
+      .panel {
+        padding:
+          16px
+          23px;
+      }
+
+      .answer {
+        min-height: 62px;
+
+        padding: 8px;
+
+        font-size: 13px;
+      }
+
+      .hotspot {
+        width: 51px;
+        height: 51px;
+
+        font-size: 21px;
+      }
+
+      .guard-bubble {
+        top: 14%;
+
+        padding:
+          14px
+          18px;
+      }
+
+    }
+
+
+    /* ==================================================
+       TABLET NA VÝŠKU
+       ================================================== */
+
+    .rotate-warning {
+      display: none;
+    }
+
+
+    @media
+      (orientation: portrait) {
+
+      .rotate-warning {
+        position: fixed;
+
+        inset: 0;
+
+        z-index: 99999;
+
+        display: flex;
+
+        flex-direction: column;
+
+        justify-content: center;
+        align-items: center;
+
+        padding: 35px;
+
+        background: #2d1c10;
+
+        color: #f4e1b0;
+
+        text-align: center;
+      }
+
+
+      .rotate-icon {
+        font-size: 75px;
+      }
+
+
+      .rotate-warning h2 {
+        margin:
+          14px
+          0
+          7px;
+
+        font-size: 30px;
+      }
+
+
+      .rotate-warning p {
+        margin: 0;
+
+        font-size: 18px;
+      }
+
+    }
+
+  </style>
+</head>
+
+
+<body>
+
+
+  <!-- ==================================================
+       OTOČENÍ TABLETU
+       ================================================== -->
+
+  <div class="rotate-warning">
+
+    <div class="rotate-icon">
+      ↻
+    </div>
+
+    <h2>
+      Otoč tablet na šířku
+    </h2>
+
+    <p>
+      Tato hra je určena
+      pro tablet naležato.
+    </p>
+
+  </div>
+
+
+
+  <!-- ==================================================
+       HLAVNÍ SCÉNA
+       ================================================== -->
+
+  <main
+    class="scene"
+    id="scene"
+  >
+
+
+    <!-- HLAVIČKA -->
+
+    <div class="top-bar">
+
+      <div class="room-title">
+        ŠATLAVA
+      </div>
+
+      <div
+        class="progress"
+        id="progress"
+      >
+        PROZKOUMÁNO 0 / 3
+      </div>
+
+    </div>
+
+
+
+    <!-- ==================================================
+         HRÁČ
+         ================================================== -->
+
+    <div class="player">
+
+      <img
+        id="playerImage"
+        src=""
+        alt="Tvoje postava"
+      >
+
+    </div>
+
+
+
+    <!-- ==================================================
+         INTERAKTIVNÍ BODY
+         ================================================== -->
+
+    <button
+      class="
+        hotspot
+        hotspot-cell
+      "
+      data-info="satlava"
+      aria-label="Šatlava"
+    >
+      🔍
+    </button>
+
+
+    <button
+      class="
+        hotspot
+        hotspot-straw
+      "
+      data-info="conditions"
+      aria-label="Podmínky v cele"
+    >
+      🕯️
+    </button>
+
+
+    <button
+      class="
+        hotspot
+        hotspot-bars
+      "
+      data-info="bars"
+      aria-label="Mříže"
+    >
+      🔑
+    </button>
+
+
+
+    <!-- ==================================================
+         MŘÍŽ
+         ================================================== -->
+
+    <div
+      class="gate"
+      id="gate"
+    >
+
+      <div class="gate-frame">
+
+        <div class="gate-lock"></div>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- ==================================================
+         STRÁŽNÝ
+         ================================================== -->
+
+    <div
+      class="guard"
+      id="guard"
+    >
+
+      <img
+        src="images/strazny.png"
+        alt="Městský strážný"
+      >
+
+    </div>
+
+
+
+    <!-- ==================================================
+         BUBLINA STRÁŽNÉHO
+         ================================================== -->
+
+    <div
+      class="guard-bubble"
+      id="guardBubble"
+    >
+
+      <h3>
+        „Tak ty jsi ten cizinec z tržiště!“
+      </h3>
+
+      <p>
+        Když ses snažil/a projít davem,
+        převrhl se stánek jednoho z obchodníků.
+        Strhla se hádka a městská stráž
+        tě považovala za viníka.
+      </p>
+
+      <p>
+        Já ale nerozhoduji o tom,
+        co s tebou bude dál.
+      </p>
+
+      <p>
+        <strong>
+          Předvedu tě před rychtáře
+          a konšely.
+        </strong>
+      </p>
+
+      <a
+        href="rychtar-konsele.html"
+        class="next-button"
+      >
+        PŘED RYCHTÁŘE A KONŠELY →
+      </a>
+
+    </div>
+
+
+
+    <!-- ==================================================
+         OVERLAY
+         ================================================== -->
+
+    <div
+      class="overlay"
+      id="overlay"
+    ></div>
+
+
+
+    <!-- ==================================================
+         ÚVOD
+         ================================================== -->
+
+    <section
+      class="panel"
+      id="introPanel"
+    >
+
+      <h2>
+        CO SE STALO?
+      </h2>
+
+      <p>
+        Do města ses sice dostal/a,
+        ale něco se pokazilo.
+      </p>
+
+      <p>
+        Městská stráž tě zadržela
+        a skončil/a jsi za mřížemi.
+      </p>
+
+      <p>
+        Zatím netušíš proč.
+        Nejdříve se rozhlédni
+        a zjisti, kde vlastně jsi.
+      </p>
+
+      <button
+        class="panel-button"
+        id="startButton"
+      >
+        ROZHLÉDNOUT SE
+      </button>
+
+    </section>
+
+
+
+    <!-- ==================================================
+         INFORMAČNÍ PANEL
+         ================================================== -->
+
+    <section
+      class="panel"
+      id="infoPanel"
+      hidden
+    >
+
+      <h2 id="infoTitle"></h2>
+
+      <div id="infoText"></div>
+
+      <button
+        class="panel-button"
+        id="closeInfo"
+      >
+        ROZUMÍM
+      </button>
+
+    </section>
+
+
+
+    <!-- ==================================================
+         ÚKOL
+         ================================================== -->
+
+    <section
+      class="
+        panel
+        task-panel
+      "
+      id="taskPanel"
+      hidden
+    >
+
+      <div class="task-label">
+        ÚKOL
+      </div>
+
+      <h2>
+        DOSTANEŠ SE VEN?
+      </h2>
+
+      <div
+        class="question"
+        id="questionText"
+      ></div>
+
+      <div
+        class="answers"
+        id="answers"
+      ></div>
+
+      <div
+        class="task-feedback"
+        id="taskFeedback"
+      ></div>
+
+    </section>
+
+
+  </main>
+
+
+
+  <script>
+
+    /* ==================================================
+       POSTAVA HRÁČE
+       ================================================== */
+
+    const playerImage =
+      document.getElementById(
+        "playerImage"
+      );
+
+
+    const selectedOutfit =
+  localStorage.getItem(
+    "obleceniObrazek"
+  );
+
+
+if (selectedOutfit) {
+
+  const lyingOutfit =
+    selectedOutfit.replace(
+      ".png",
+      "-lezi.png"
+    );
+
+  playerImage.src =
+    lyingOutfit;
+
+}
+
+
+
+    else {
+
+      /*
+        pojistka, pokud hráč přišel
+        přímo na tuto stránku
+      */
+
+      const gender =
+        localStorage.getItem(
+          "pohlavi"
+        );
+
+
+      if (gender === "zena") {
+
+        playerImage.src =
+          "images/mestanka-zena-1.png";
+
+      }
+
+      else {
+
+        playerImage.src =
+          "images/mestan-muz-1.png";
+
+      }
+
+    }
+
+
+
+    /* ==================================================
+       PRVKY
+       ================================================== */
+
+    const overlay =
+      document.getElementById(
+        "overlay"
+      );
+
+
+    const introPanel =
+      document.getElementById(
+        "introPanel"
+      );
+
+
+    const startButton =
+      document.getElementById(
+        "startButton"
+      );
+
+
+    const infoPanel =
+      document.getElementById(
+        "infoPanel"
+      );
+
+
+    const infoTitle =
+      document.getElementById(
+        "infoTitle"
+      );
+
+
+    const infoText =
+      document.getElementById(
+        "infoText"
+      );
+
+
+    const closeInfo =
+      document.getElementById(
+        "closeInfo"
+      );
+
+
+    const hotspots =
+      document.querySelectorAll(
+        ".hotspot"
+      );
+
+
+    const progress =
+      document.getElementById(
+        "progress"
+      );
+
+
+    const taskPanel =
+      document.getElementById(
+        "taskPanel"
+      );
+
+
+    const questionText =
+      document.getElementById(
+        "questionText"
+      );
+
+
+    const answers =
+      document.getElementById(
+        "answers"
+      );
+
+
+    const taskFeedback =
+      document.getElementById(
+        "taskFeedback"
+      );
+
+
+    const gate =
+      document.getElementById(
+        "gate"
+      );
+
+
+    const guard =
+      document.getElementById(
+        "guard"
+      );
+
+
+    const guardBubble =
+      document.getElementById(
+        "guardBubble"
+      );
+
+
+
+    /* ==================================================
+       ÚVOD
+       ================================================== */
+
+    startButton.addEventListener(
+      "click",
+      function () {
+
+        introPanel.hidden =
+          true;
+
+
+        overlay.hidden =
+          true;
+
+      }
+    );
+
+
+
+    /* ==================================================
+       INFORMACE
+       ================================================== */
+
+    const information = {
+
+      satlava: {
+
+        title:
+          "CO JE ŠATLAVA?",
+
+        text:
+          `
+            <span class="important-word">
+              ŠATLAVA
+            </span>
+
+            <p>
+              Šatlava byla městská věznice
+              nebo prostor, kde byli zadržováni
+              lidé obvinění z provinění.
+            </p>
+
+            <p>
+              Ve městech bývala spojena
+              s městskou správou a dohledem
+              městských úředníků.
+            </p>
+          `
+
+      },
+
+
+      conditions: {
+
+        title:
+          "ŽIVOT ZA MŘÍŽEMI",
+
+        text:
+          `
+            <p>
+              Pobyt ve vězení nebyl pohodlný.
+            </p>
+
+            <p>
+              Vybavení bývalo jednoduché
+              a zadržený člověk měl jen málo
+              soukromí a pohodlí.
+            </p>
+
+            <p>
+              Šatlava nebyla místem,
+              kde by člověk chtěl zůstat dlouho.
+            </p>
+          `
+
+      },
+
+
+      bars: {
+
+        title:
+          "KDO TĚ ODTUD DOSTANE?",
+
+        text:
+          `
+            <p>
+              O tvém dalším osudu nerozhoduje
+              samotný strážný.
+            </p>
+
+            <p>
+              Ve městě existovali úředníci,
+              kteří se podíleli na správě
+              a rozhodování.
+            </p>
+
+            <p>
+              Kdo to byl, zjistíš,
+              pokud se odsud dostaneš.
+            </p>
+          `
+
+      }
+
+    };
+
+
+    const visited =
+      new Set();
+
+
+
+    hotspots.forEach(
+      function (hotspot) {
+
+        hotspot.addEventListener(
+          "click",
+          function () {
+
+            const key =
+              hotspot.dataset.info;
+
+
+            const data =
+              information[key];
+
+
+            infoTitle.textContent =
+              data.title;
+
+
+            infoText.innerHTML =
+              data.text;
+
+
+            visited.add(
+              key
+            );
+
+
+            hotspot.classList.add(
+              "done"
+            );
+
+
+            progress.textContent =
+              "PROZKOUMÁNO "
+              +
+              visited.size
+              +
+              " / 3";
+
+
+            overlay.hidden =
+              false;
+
+
+            infoPanel.hidden =
+              false;
+
+          }
+        );
+
+      }
+    );
+
+
+
+    closeInfo.addEventListener(
+      "click",
+      function () {
+
+        infoPanel.hidden =
+          true;
+
+
+        overlay.hidden =
+          true;
+
+
+        if (
+          visited.size === 3
+        ) {
+
+          setTimeout(
+            startTask,
+            350
+          );
+
+        }
+
+      }
+    );
+
+
+
+    /* ==================================================
+       ÚKOL
+       ================================================== */
+
+    const questions = [
+
+      {
+        question:
+          "Co byla šatlava?",
+
+        answers: [
+
+          {
+            text:
+              "Městská věznice",
+
+            correct:
+              true
+          },
+
+          {
+            text:
+              "Městská hospoda",
+
+            correct:
+              false
+          },
+
+          {
+            text:
+              "Dům bohatého obchodníka",
+
+            correct:
+              false
+          }
+
+        ]
+
+      },
+
+
+      {
+        question:
+          "Kdo podle toho, co ses dozvěděl/a, rozhodoval o dění ve městě?",
+
+        answers: [
+
+          {
+            text:
+              "Pouze městský strážný",
+
+            correct:
+              false
+          },
+
+          {
+            text:
+              "Městští úředníci a představitelé města",
+
+            correct:
+              true
+          },
+
+          {
+            text:
+              "Každý obyvatel města sám",
+
+            correct:
+              false
+          }
+
+        ]
+
+      }
+
+    ];
+
+
+    let currentQuestion =
+      0;
+
+
+    let taskStarted =
+      false;
+
+
+
+    function startTask() {
+
+      if (taskStarted) {
+
+        return;
+
+      }
+
+
+      taskStarted =
+        true;
+
+
+      overlay.hidden =
+        false;
+
+
+      taskPanel.hidden =
+        false;
+
+
+      showQuestion();
+
+    }
+
+
+
+    function showQuestion() {
+
+      const data =
+        questions[
+          currentQuestion
+        ];
+
+
+      questionText.textContent =
+        data.question;
+
+
+      answers.innerHTML =
+        "";
+
+
+      taskFeedback.textContent =
+        "";
+
+
+      data.answers.forEach(
+        function (answer) {
+
+          const button =
+            document.createElement(
+              "button"
+            );
+
+
+          button.className =
+            "answer";
+
+
+          button.textContent =
+            answer.text;
+
+
+          button.addEventListener(
+            "click",
+            function () {
+
+              if (answer.correct) {
+
+                button.classList.add(
+                  "correct"
+                );
+
+
+                taskFeedback.style.color =
+                  "#56742f";
+
+
+                taskFeedback.textContent =
+                  "✓ Správně!";
+
+
+                Array.from(
+                  answers.children
+                )
+                .forEach(
+                  function (item) {
+
+                    item.disabled =
+                      true;
+
+                  }
+                );
+
+
+                setTimeout(
+                  function () {
+
+                    currentQuestion++;
+
+
+                    if (
+                      currentQuestion
+                      <
+                      questions.length
+                    ) {
+
+                      showQuestion();
+
+                    }
+
+                    else {
+
+                      finishTask();
+
+                    }
+
+                  },
+                  850
+                );
+
+              }
+
+              else {
+
+                button.classList.remove(
+                  "wrong"
+                );
+
+
+                void button.offsetWidth;
+
+
+                button.classList.add(
+                  "wrong"
+                );
+
+
+                taskFeedback.style.color =
+                  "#963926";
+
+
+                taskFeedback.textContent =
+                  "✕ Zkus to ještě jednou.";
+
+              }
+
+            }
+          );
+
+
+          answers.appendChild(
+            button
+          );
+
+        }
+      );
+
+    }
+
+
+
+    /* ==================================================
+       DOKONČENÍ ÚKOLU
+       ================================================== */
+
+    function finishTask() {
+
+      taskPanel.hidden =
+        true;
+
+
+      overlay.hidden =
+        true;
+
+
+      /*
+        nejdříve se otevře mříž
+      */
+
+      gate.classList.add(
+        "open"
+      );
+
+
+      /*
+        potom přijde strážný
+      */
+
+      setTimeout(
+        function () {
+
+          guard.classList.add(
+            "show"
+          );
+
+        },
+        650
+      );
+
+
+      /*
+        nakonec se objeví jeho bublina
+      */
+
+      setTimeout(
+        function () {
+
+          guardBubble.classList.add(
+            "show"
+          );
+
+        },
+        1450
+      );
+
+
+      /*
+        uložíme dokončení části
+      */
+
+      localStorage.setItem(
+        "satlavaHotovo",
+        "true"
+      );
+
+    }
+
+  </script>
+
+</body>
+
+</html>
